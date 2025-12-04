@@ -18,10 +18,8 @@ export class CrystalGrowthSimulation implements PhysicsSimulation {
 
   private group: THREE.Group | null = null;
   private time = 0;
-  private params: Record<string, unknown> = {};
 
-  initialize(scene: THREE.Scene, params: Record<string, unknown>): void {
-    this.params = params;
+  initialize(scene: THREE.Scene, _params: Record<string, unknown>): void {
     this.time = 0;
     this.group = new THREE.Group();
 

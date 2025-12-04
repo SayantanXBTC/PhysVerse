@@ -65,8 +65,8 @@ export default function PublicGalleryPage() {
             </div>
             <h3 className="text-2xl font-semibold mb-2">No Public Simulations Yet</h3>
             <p className="text-gray-400 mb-8">Be the first to share your creation!</p>
-            <Link to="/signup" className="btn btn-primary px-8 py-3">
-              Get Started
+            <Link to="/dashboard" className="btn btn-primary px-8 py-3">
+              Create Simulation
             </Link>
           </div>
         ) : (

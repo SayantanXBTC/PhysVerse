@@ -8,6 +8,10 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  isEmailVerified?: boolean;
+  avatar?: string;
+  lastLogin?: Date;
+  createdAt?: Date;
 }
 
 export interface Simulation {

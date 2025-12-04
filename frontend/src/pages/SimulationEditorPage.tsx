@@ -6,7 +6,10 @@ import { simulationRegistry } from '@/simulation/registry';
 import SimulationCanvas from '@/components/SimulationCanvas';
 import DynamicParameterControls from '@/simulation/ui/DynamicParameterControls';
 import PerformanceMonitor from '@/components/PerformanceMonitor';
-import { Save, ArrowLeft, Play, Pause, RotateCcw, Globe, Lock } from 'lucide-react';
+import SimulationDataChart from '@/components/SimulationDataChart';
+import { useSimulationData } from '@/hooks/useSimulationData';
+import { getSimulationDataConfig } from '@/utils/simulationDataConfig';
+import { Save, ArrowLeft, Play, Pause, RotateCcw, Globe, Lock, BarChart3 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function SimulationEditorPage() {
@@ -20,6 +23,9 @@ export default function SimulationEditorPage() {
   const [parameters, setParameters] = useState<Record<string, unknown>>({});
   const [isPublic, setIsPublic] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
+  const [showChart, setShowChart] = useState(true);
+  const [chartKey, setChartKey] = useState(0); // Force re-render of chart
+  const { data: chartData, addDataPoint, clearData } = useSimulationData(150);
 
   const simulation = simulationRegistry.create(simulationId);
 
@@ -46,8 +52,10 @@ export default function SimulationEditorPage() {
         defaultParams[key] = param.default;
       });
       setParameters(defaultParams);
+      clearData(); // Clear chart data when switching simulations
+      setChartKey(prev => prev + 1); // Force chart re-render
     }
-  }, [simulationId]);
+  }, [simulationId, clearData]);
 
   const saveMutation = useMutation({
     mutationFn: () => {
@@ -64,8 +72,10 @@ export default function SimulationEditorPage() {
         navigate(`/simulation/${data._id}`);
       }
     },
-    onError: () => {
-      toast.error('Failed to save simulation');
+    onError: (error: unknown) => {
+      console.error('Save error:', error);
+      const errorMessage = error?.response?.data?.error || error?.message || 'Failed to save simulation';
+      toast.error(errorMessage);
     }
   });
 
@@ -75,6 +85,8 @@ export default function SimulationEditorPage() {
 
   const handleReset = () => {
     setIsRunning(false);
+    clearData();
+    setChartKey(prev => prev + 1); // Force chart re-render
     if (simulation) {
       const defaultParams: Record<string, unknown> = {};
       Object.entries(simulation.parameters).forEach(([key, param]) => {
@@ -83,6 +95,26 @@ export default function SimulationEditorPage() {
       setParameters(defaultParams);
     }
   };
+
+  // Get simulation-specific data configuration
+  const dataConfig = getSimulationDataConfig(simulationId);
+
+  // Collect simulation-specific data
+  useEffect(() => {
+    if (!isRunning) return;
+    
+    const interval = setInterval(() => {
+      const time = chartData.length * 0.1;
+      const simulationData = dataConfig.generateData(time, parameters);
+      
+      addDataPoint({
+        time: parseFloat(time.toFixed(2)),
+        ...simulationData,
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [isRunning, chartData.length, addDataPoint, simulationId, parameters, dataConfig]);
 
   if (isLoading) {
     return (
@@ -101,6 +133,7 @@ export default function SimulationEditorPage() {
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <button
+              type="button"
               onClick={() => navigate('/dashboard')}
               className="p-2 hover:bg-gray-700/50 rounded-lg transition-colors"
               aria-label="Back to dashboard"
@@ -123,6 +156,22 @@ export default function SimulationEditorPage() {
 
           <div className="flex items-center space-x-3">
             <button
+              type="button"
+              onClick={() => {
+                setShowChart(!showChart);
+                setChartKey(prev => prev + 1); // Force chart re-render when toggling
+              }}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                showChart 
+                  ? 'bg-red-500/10 text-red-400 border border-red-500/20' 
+                  : 'bg-gray-700/50 text-gray-400 border border-gray-700'
+              }`}
+            >
+              <BarChart3 size={18} />
+              <span className="text-sm">{showChart ? 'Hide Chart' : 'Show Chart'}</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setIsPublic(!isPublic)}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
                 isPublic 
@@ -134,6 +183,7 @@ export default function SimulationEditorPage() {
               <span className="text-sm">{isPublic ? 'Public' : 'Private'}</span>
             </button>
             <button
+              type="button"
               onClick={() => saveMutation.mutate()}
               disabled={saveMutation.isPending}
               className="flex items-center space-x-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors disabled:opacity-50"
@@ -146,18 +196,37 @@ export default function SimulationEditorPage() {
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 relative">
-          <SimulationCanvas
-            simulationId={simulationId}
-            parameters={parameters}
-            isRunning={isRunning}
-          />
+        <div className="flex-1 relative flex flex-col overflow-hidden">
+          <div className={showChart ? 'flex-1 overflow-hidden' : 'h-full overflow-hidden'}>
+            <SimulationCanvas
+              simulationId={simulationId}
+              parameters={parameters}
+              isRunning={isRunning}
+            />
+          </div>
+          
+          {showChart && (
+            <div className="h-96 flex-shrink-0 p-4 bg-gray-900/50 border-t border-gray-700/50">
+              <SimulationDataChart
+                key={chartKey}
+                data={chartData}
+                dataKeys={dataConfig.dataKeys.map(dk => ({
+                  key: dk.key,
+                  color: dk.color,
+                  label: `${dk.label} (${dk.unit})`,
+                }))}
+                title={dataConfig.title}
+                maxPoints={150}
+              />
+            </div>
+          )}
         </div>
 
         <div className="w-96 bg-gray-800/30 backdrop-blur-md border-l border-gray-700/50 overflow-y-auto">
           <div className="p-6 space-y-6">
             <div className="flex items-center space-x-2">
               <button
+                type="button"
                 onClick={() => setIsRunning(!isRunning)}
                 className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-lg transition-all ${
                   isRunning
@@ -169,6 +238,7 @@ export default function SimulationEditorPage() {
                 <span className="font-medium">{isRunning ? 'Pause' : 'Play'}</span>
               </button>
               <button
+                type="button"
                 onClick={handleReset}
                 className="p-3 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors"
                 aria-label="Reset simulation"

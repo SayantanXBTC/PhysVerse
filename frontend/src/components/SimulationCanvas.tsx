@@ -15,41 +15,71 @@ interface Props {
 function SimulationRunner({ simulationId, parameters, isRunning }: Props) {
   const { scene } = useThree();
   const engineRef = useRef<SimulationEngine | null>(null);
+  const prevSimulationIdRef = useRef<string>('');
 
+  // Initialize engine once
   useEffect(() => {
     if (!engineRef.current) {
       engineRef.current = new SimulationEngine(scene);
     }
 
-    const simulation = simulationRegistry.create(simulationId);
-    if (simulation) {
-      engineRef.current.loadSimulation(simulation, parameters);
-    }
-
     return () => {
-      engineRef.current?.cleanup();
-    };
-  }, [simulationId, scene, parameters]);
-
-  useEffect(() => {
-    if (engineRef.current) {
-      engineRef.current.updateParameters(parameters);
-    }
-  }, [parameters]);
-
-  useEffect(() => {
-    if (engineRef.current) {
-      if (isRunning) {
-        engineRef.current.play();
-      } else {
-        engineRef.current.pause();
+      if (engineRef.current) {
+        engineRef.current.cleanup();
+        engineRef.current = null;
       }
+    };
+  }, [scene]);
+
+  // Load simulation when ID changes
+  useEffect(() => {
+    if (!engineRef.current) return;
+
+    // Only reload if simulation ID actually changed
+    if (prevSimulationIdRef.current !== simulationId) {
+      const simulation = simulationRegistry.create(simulationId);
+      if (simulation) {
+        try {
+          engineRef.current.loadSimulation(simulation, parameters);
+          prevSimulationIdRef.current = simulationId;
+        } catch (error) {
+          console.error('Error loading simulation:', error);
+        }
+      }
+    }
+  }, [simulationId, parameters, scene]);
+
+  // Update parameters when they change (but not on initial load)
+  useEffect(() => {
+    if (!engineRef.current || prevSimulationIdRef.current !== simulationId) return;
+    
+    try {
+      engineRef.current.updateParameters(parameters);
+    } catch (error) {
+      console.error('Error updating parameters:', error);
+    }
+  }, [parameters, simulationId]);
+
+  // Control play/pause
+  useEffect(() => {
+    if (!engineRef.current) return;
+    
+    if (isRunning) {
+      engineRef.current.play();
+    } else {
+      engineRef.current.pause();
     }
   }, [isRunning]);
 
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => {
     if (engineRef.current && isRunning) {
-      engineRef.current.update(delta);
+      try {
+        // Cap delta to prevent large jumps
+        const cappedDelta = Math.min(delta, 0.1);
+        engineRef.current.update(cappedDelta);
+      } catch (error) {
+        console.error('Error updating simulation:', error);
+      }
     }
   });
 

@@ -100,7 +100,7 @@ export class SpringMassSimulation implements PhysicsSimulation {
     scene.add(this.equilibriumLine);
   }
 
-  update(delta: number, state: SimulationState): void {
+  update(delta: number, _state: SimulationState): void {
     if (!this.mass) return;
 
     const dt = Math.min(delta, 0.05);

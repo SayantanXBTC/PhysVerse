@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Rocket, Zap, Globe, Lock, Sparkles, Atom, Waves, Wind, Orbit, FlaskConical, Brain, TrendingUp } from 'lucide-react';
+import { Rocket, Zap, Globe, Lock, Sparkles, Atom, Waves, Wind, Orbit, FlaskConical, Brain, TrendingUp, Trophy, BookOpen, Target, Calculator } from 'lucide-react';
 import { useState } from 'react';
 
 export default function LandingPage() {
@@ -292,6 +292,114 @@ export default function LandingPage() {
               } transition-all duration-300`}></div>
             </Link>
           ))}
+        </div>
+      </div>
+
+      {/* New Features Showcase */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div className="text-center mb-16">
+          <h2 className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent">
+            More Than Just Simulations
+          </h2>
+          <p className="text-xl text-gray-300">
+            A complete <span className="text-red-400 font-semibold">physics learning ecosystem</span>
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8 mb-16">
+          {/* Challenges Card */}
+          <Link
+            to="/challenges"
+            className="group relative p-12 bg-gradient-to-br from-purple-950/40 via-black/60 to-pink-950/40 backdrop-blur-xl border-2 border-purple-500/30 rounded-3xl hover:border-purple-500/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/40 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-pink-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-5 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-xl shadow-purple-500/50">
+                  <Trophy className="text-white" size={48} />
+                </div>
+                <div>
+                  <h3 className="text-4xl font-black text-white mb-2">Physics Challenges</h3>
+                  <p className="text-purple-300 font-semibold">Test your skills & earn points</p>
+                </div>
+              </div>
+              
+              <p className="text-gray-300 text-lg mb-6 leading-relaxed">
+                Take on <span className="text-purple-400 font-bold">8 exciting challenges</span> from beginner to expert level. 
+                Master physics concepts through hands-on problem solving and compete on the global leaderboard.
+              </p>
+              
+              <div className="flex flex-wrap gap-3 mb-6">
+                <span className="px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-full text-green-300 text-sm font-bold">
+                  ⭐ Beginner
+                </span>
+                <span className="px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-full text-blue-300 text-sm font-bold">
+                  ⭐⭐ Intermediate
+                </span>
+                <span className="px-4 py-2 bg-orange-500/20 border border-orange-500/30 rounded-full text-orange-300 text-sm font-bold">
+                  ⭐⭐⭐ Advanced
+                </span>
+                <span className="px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-full text-purple-300 text-sm font-bold">
+                  ⭐⭐⭐⭐ Expert
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-2 text-purple-400 font-bold text-lg group-hover:gap-4 transition-all">
+                <Target size={24} />
+                <span>Start Challenges</span>
+                <span className="text-2xl">→</span>
+              </div>
+            </div>
+          </Link>
+
+          {/* Formulas Card */}
+          <Link
+            to="/formulas"
+            className="group relative p-12 bg-gradient-to-br from-blue-950/40 via-black/60 to-cyan-950/40 backdrop-blur-xl border-2 border-blue-500/30 rounded-3xl hover:border-blue-500/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/40 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-cyan-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-5 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-xl shadow-blue-500/50">
+                  <BookOpen className="text-white" size={48} />
+                </div>
+                <div>
+                  <h3 className="text-4xl font-black text-white mb-2">Formula Library</h3>
+                  <p className="text-blue-300 font-semibold">Essential physics reference</p>
+                </div>
+              </div>
+              
+              <p className="text-gray-300 text-lg mb-6 leading-relaxed">
+                Access <span className="text-blue-400 font-bold">63 essential formulas</span> with detailed explanations, 
+                variable definitions, and real-world applications. Your complete physics reference guide.
+              </p>
+              
+              <div className="flex flex-wrap gap-3 mb-6">
+                <span className="px-4 py-2 bg-gray-700/50 border border-gray-600/30 rounded-full text-gray-300 text-sm font-bold">
+                  Mechanics
+                </span>
+                <span className="px-4 py-2 bg-gray-700/50 border border-gray-600/30 rounded-full text-gray-300 text-sm font-bold">
+                  Quantum
+                </span>
+                <span className="px-4 py-2 bg-gray-700/50 border border-gray-600/30 rounded-full text-gray-300 text-sm font-bold">
+                  Relativity
+                </span>
+                <span className="px-4 py-2 bg-gray-700/50 border border-gray-600/30 rounded-full text-gray-300 text-sm font-bold">
+                  Thermodynamics
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-2 text-blue-400 font-bold text-lg group-hover:gap-4 transition-all">
+                <Calculator size={24} />
+                <span>Browse Formulas</span>
+                <span className="text-2xl">→</span>
+              </div>
+            </div>
+          </Link>
         </div>
       </div>
 

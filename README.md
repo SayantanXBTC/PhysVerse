@@ -32,22 +32,151 @@ A production-grade, real-time 3D physics simulation platform built with modern w
 - Tailwind CSS
 - React Query (data fetching)
 - Zustand (state management)
+- Vitest (testing framework)
 
 ### Backend
 - Node.js + Express + TypeScript
 - JWT authentication
 - Zod validation
 - RESTful API design
+- Jest (testing framework)
+- Winston (logging)
 
 ### Database
 - MongoDB + Mongoose
 - MongoDB Atlas (cloud hosting)
 
 ### DevOps
-- Git/GitHub
+- Docker & Docker Compose
+- GitHub Actions (CI/CD)
 - Vercel (frontend)
 - Render/Railway (backend)
 - Environment-based configuration
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 20+
+- MongoDB (local or Atlas)
+- Git
+
+### Development Setup
+
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd PhySSS
+```
+
+2. **Install dependencies**
+```bash
+# Install frontend dependencies
+cd frontend
+npm install
+
+# Install backend dependencies
+cd ../backend
+npm install
+```
+
+3. **Environment Configuration**
+```bash
+# Backend (.env)
+cp backend/.env.example backend/.env
+# Edit backend/.env with your MongoDB URI and JWT secret
+
+# Frontend (.env)
+cp frontend/.env.example frontend/.env
+# Edit frontend/.env with your API URL
+```
+
+4. **Start development servers**
+```bash
+# Terminal 1 - Backend
+cd backend
+npm run dev
+
+# Terminal 2 - Frontend
+cd frontend
+npm run dev
+```
+
+### Docker Setup (Alternative)
+
+```bash
+# Start all services with Docker Compose
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+## 🧪 Testing
+
+### Frontend Tests
+```bash
+cd frontend
+npm run test          # Run tests
+npm run test:ui       # Run tests with UI
+npm run test:coverage # Run with coverage
+```
+
+### Backend Tests
+```bash
+cd backend
+npm run test          # Run tests
+npm run test:watch    # Run in watch mode
+npm run test:coverage # Run with coverage
+```
+
+## 📦 Building for Production
+
+### Frontend
+```bash
+cd frontend
+npm run build
+npm run preview  # Preview production build
+```
+
+### Backend
+```bash
+cd backend
+npm run build
+npm start       # Start production server
+```
+
+## 🔧 Development Tools
+
+- **Type Checking**: `npm run type-check`
+- **Linting**: `npm run lint`
+- **Performance Monitoring**: Built-in logging and metrics
+- **Hot Reload**: Automatic reload on file changes
+
+## 📚 API Documentation
+
+The API follows RESTful conventions. Key endpoints:
+
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `GET /api/simulations` - Get user simulations
+- `POST /api/simulations` - Create simulation
+- `GET /api/public/simulations` - Browse public gallery
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
 
 ## 📦 Installation
 

@@ -1,6 +1,6 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
-import { LogOut, Home, LayoutDashboard, Globe } from 'lucide-react';
+import { LogOut, Home, LayoutDashboard, Globe, Trophy, BookOpen, Award } from 'lucide-react';
 
 export default function Layout() {
   const { user, logout } = useAuthStore();
@@ -40,6 +40,18 @@ export default function Layout() {
                 <Link to="/gallery" className="flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-red-950/40 border border-transparent hover:border-red-500/30 transition-all duration-300 hover:scale-105 text-gray-300 hover:text-white">
                   <Globe size={18} />
                   <span className="font-semibold">Gallery</span>
+                </Link>
+                <Link to="/challenges" className="flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-red-950/40 border border-transparent hover:border-red-500/30 transition-all duration-300 hover:scale-105 text-gray-300 hover:text-white">
+                  <Trophy size={18} />
+                  <span className="font-semibold">Challenges</span>
+                </Link>
+                <Link to="/formulas" className="flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-red-950/40 border border-transparent hover:border-red-500/30 transition-all duration-300 hover:scale-105 text-gray-300 hover:text-white">
+                  <BookOpen size={18} />
+                  <span className="font-semibold">Formulas</span>
+                </Link>
+                <Link to="/leaderboard" className="flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-red-950/40 border border-transparent hover:border-red-500/30 transition-all duration-300 hover:scale-105 text-gray-300 hover:text-white">
+                  <Award size={18} />
+                  <span className="font-semibold">Leaderboard</span>
                 </Link>
               </div>
             </div>

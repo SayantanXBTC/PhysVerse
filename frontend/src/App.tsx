@@ -4,8 +4,9 @@ import { useQuery } from '@tanstack/react-query';
 import { authService } from './services/authService';
 import { useAuthStore } from './store/authStore';
 import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
+import EnhancedLoginPage from './pages/EnhancedLoginPage';
+import EnhancedSignupPage from './pages/EnhancedSignupPage';
+import OnboardingPage from './pages/OnboardingPage';
 import DashboardPage from './pages/DashboardPage';
 import SimulationEditorPage from './pages/SimulationEditorPage';
 import PublicGalleryPage from './pages/PublicGalleryPage';
@@ -14,7 +15,10 @@ import PhysicistDetailPage from './pages/PhysicistDetailPage';
 import SimulationDetailPage from './pages/SimulationDetailPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
-import ProfilePage from './pages/ProfilePage';
+import EnhancedProfilePage from './pages/EnhancedProfilePage';
+import CompleteChallengesPage from './pages/CompleteChallengesPage';
+import FormulasPage from './pages/FormulasPage';
+import LeaderboardPage from './pages/LeaderboardPage';
 import Layout from './components/Layout';
 import KeyboardShortcutsOverlay from './components/KeyboardShortcutsOverlay';
 import FPSCounter from './components/FPSCounter';
@@ -61,8 +65,9 @@ function App() {
       
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/login" element={<EnhancedLoginPage />} />
+        <Route path="/signup" element={<EnhancedSignupPage />} />
+        <Route path="/onboarding" element={isAuthenticated ? <OnboardingPage /> : <Navigate to="/login" />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/preview" element={<SimulationPreviewPage />} />
@@ -76,7 +81,7 @@ function App() {
           />
           <Route
             path="/profile"
-            element={isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />}
+            element={isAuthenticated ? <EnhancedProfilePage /> : <Navigate to="/login" />}
           />
           <Route
             path="/simulation/:id"
@@ -86,7 +91,13 @@ function App() {
             path="/simulation/new"
             element={isAuthenticated ? <SimulationEditorPage /> : <Navigate to="/login" />}
           />
-          <Route path="/gallery" element={<PublicGalleryPage />} />
+          <Route 
+            path="/gallery" 
+            element={isAuthenticated ? <DashboardPage /> : <PublicGalleryPage />} 
+          />
+          <Route path="/challenges" element={<CompleteChallengesPage />} />
+          <Route path="/formulas" element={<FormulasPage />} />
+          <Route path="/leaderboard" element={<LeaderboardPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -2,11 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import compression from 'compression';
 import dotenv from 'dotenv';
 import { connectDatabase } from './config/database';
+import { performanceMiddleware } from './middleware/performance';
+import logger from './utils/logger';
 import authRoutes from './routes/auth';
 import simulationRoutes from './routes/simulations';
 import publicRoutes from './routes/public';
+import gamificationRoutes from './routes/gamification';
 
 dotenv.config();
 
@@ -15,6 +19,8 @@ const PORT = process.env.PORT || 5000;
 
 // Security middleware
 app.use(helmet());
+app.use(compression()); // Add compression for better performance
+app.use(performanceMiddleware); // Add performance monitoring
 app.use(cors({
   origin: process.env.NODE_ENV === 'development' 
     ? (origin, callback) => {
@@ -44,6 +50,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/simulations', simulationRoutes);
 app.use('/api/public', publicRoutes);
+app.use('/api/gamification', gamificationRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

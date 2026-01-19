@@ -3,14 +3,45 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IUser extends Document {
   name: string;
   email: string;
-  passwordHash: string;
+  passwordHash?: string;
   isEmailVerified: boolean;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
   avatar?: string;
+  bio?: string;
+  socialLinks?: {
+    twitter?: string;
+    github?: string;
+    linkedin?: string;
+    website?: string;
+  };
+  
+  // OAuth fields
+  oauthProvider?: 'google' | 'github' | 'discord' | 'local';
+  oauthId?: string;
+  
+  // Gamification
+  level: number;
+  xp: number;
+  achievements: string[];
+  badges: string[];
+  
+  // Personalization
+  favoriteTopics: string[];
+  theme: 'dark' | 'light' | 'auto';
+  customTheme?: {
+    primary: string;
+    secondary: string;
+  };
+  
+  // Activity
   lastLogin?: Date;
+  loginCount: number;
+  totalSimulationTime: number;
+  onboardingCompleted: boolean;
+  
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,7 +64,9 @@ const userSchema = new Schema<IUser>({
   },
   passwordHash: {
     type: String,
-    required: true
+    required: function(this: IUser) {
+      return this.oauthProvider === 'local' || !this.oauthProvider;
+    }
   },
   isEmailVerified: {
     type: Boolean,
@@ -59,10 +92,77 @@ const userSchema = new Schema<IUser>({
     type: String,
     default: null
   },
+  bio: {
+    type: String,
+    maxlength: 500,
+    default: ''
+  },
+  socialLinks: {
+    twitter: { type: String, default: '' },
+    github: { type: String, default: '' },
+    linkedin: { type: String, default: '' },
+    website: { type: String, default: '' }
+  },
+  
+  // OAuth
+  oauthProvider: {
+    type: String,
+    enum: ['google', 'github', 'discord', 'local'],
+    default: 'local'
+  },
+  oauthId: {
+    type: String,
+    sparse: true
+  },
+  
+  // Gamification
+  level: {
+    type: Number,
+    default: 1
+  },
+  xp: {
+    type: Number,
+    default: 0
+  },
+  achievements: [{
+    type: String
+  }],
+  badges: [{
+    type: String
+  }],
+  
+  // Personalization
+  favoriteTopics: [{
+    type: String
+  }],
+  theme: {
+    type: String,
+    enum: ['dark', 'light', 'auto'],
+    default: 'dark'
+  },
+  customTheme: {
+    primary: { type: String, default: '#ef4444' },
+    secondary: { type: String, default: '#f43f5e' }
+  },
+  
+  // Activity
   lastLogin: {
     type: Date,
     default: null
   },
+  loginCount: {
+    type: Number,
+    default: 0
+  },
+  totalSimulationTime: {
+    type: Number,
+    default: 0
+  },
+  onboardingCompleted: {
+    type: Boolean,
+    default: false
+  },
+  
   createdAt: {
     type: Date,
     default: Date.now
@@ -74,5 +174,8 @@ const userSchema = new Schema<IUser>({
 }, {
   timestamps: true
 });
+
+// Index for OAuth lookups
+userSchema.index({ oauthProvider: 1, oauthId: 1 });
 
 export const User = mongoose.model<IUser>('User', userSchema);

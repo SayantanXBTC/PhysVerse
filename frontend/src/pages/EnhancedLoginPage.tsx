@@ -21,8 +21,8 @@ export default function EnhancedLoginPage() {
       toast.success(`Welcome back, ${data.user.name}!`);
       navigate('/dashboard', { replace: true }); // Replace history for better back button behavior
     },
-    onError: (err: unknown) => {
-      toast.error(err.response?.data?.error || 'Login failed');
+    onError: (err: any) => {
+      toast.error((err as any)?.response?.data?.error || 'Login failed');
     }
   });
 

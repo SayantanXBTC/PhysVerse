@@ -4,7 +4,7 @@ import { ACHIEVEMENTS } from '../models/Achievement';
 import { User } from '../models/User';
 import { Simulation } from '../models/Simulation';
 
-export const getProgress = async (req: any, res: Response): Promise<void> => {
+export const getProgress = async (req: any, res: Response): Promise<Response | void> => {
   try {
     const userId = req.userId;
     if (!userId) {
@@ -19,7 +19,7 @@ export const getProgress = async (req: any, res: Response): Promise<void> => {
   }
 };
 
-export const getAchievements = async (req: any, res: Response): Promise<void> => {
+export const getAchievements = async (req: any, res: Response): Promise<Response | void> => {
   try {
     const userId = req.userId;
     if (!userId) {
@@ -73,7 +73,7 @@ export const getActivities = async (req: any, res: Response): Promise<void> => {
   }
 };
 
-export const checkAchievements = async (req: any, res: Response): Promise<void> => {
+export const checkAchievements = async (req: any, res: Response): Promise<Response | void> => {
   try {
     const userId = req.userId;
     if (!userId) {

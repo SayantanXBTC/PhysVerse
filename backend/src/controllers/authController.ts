@@ -73,7 +73,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const { email, password, rememberMe } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) {
+    if (!user || !user.passwordHash) {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
@@ -321,6 +321,10 @@ export const changePassword = async (req: AuthRequest, res: Response): Promise<v
     }
 
     // Verify current password
+    if (!user.passwordHash) {
+      res.status(400).json({ error: 'User has no password set' });
+      return;
+    }
     const isValidPassword = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!isValidPassword) {
       res.status(401).json({ error: 'Current password is incorrect' });
@@ -351,6 +355,10 @@ export const deleteAccount = async (req: AuthRequest, res: Response): Promise<vo
     }
 
     // Verify password before deletion
+    if (!user.passwordHash) {
+      res.status(400).json({ error: 'User has no password set' });
+      return;
+    }
     const isValidPassword = await bcrypt.compare(password, user.passwordHash);
     if (!isValidPassword) {
       res.status(401).json({ error: 'Password is incorrect' });

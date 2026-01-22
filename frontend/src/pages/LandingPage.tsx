@@ -96,65 +96,65 @@ export default function LandingPage() {
       </div>
 
       {/* Hero Section */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 pb-16 sm:pb-24">
-        <div className="text-center animate-fadeInUp">
-          <div className="inline-flex items-center space-x-2 px-5 py-2.5 bg-red-950/40 border border-red-500/30 rounded-full mb-8 backdrop-blur-md hover:border-red-500/50 transition-all duration-300 hover:scale-105 cursor-pointer">
-            <Sparkles className="text-red-400 animate-pulse" size={20} />
-            <span className="text-red-300 text-sm font-semibold tracking-wide">30+ Physics Simulations Available</span>
+      <div className="relative max-w-7xl mx-auto container-mobile pt-8 sm:pt-12 lg:pt-20 pb-12 sm:pb-16 lg:pb-24 gpu-accelerated">
+        <div className="text-center animate-fadeInUp page-transition">
+          <div className="inline-flex items-center space-x-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-red-950/40 border border-red-500/30 rounded-full mb-6 sm:mb-8 backdrop-blur-md hover:border-red-500/50 transition-all duration-300 hover:scale-105 cursor-pointer">
+            <Sparkles className="text-red-400 animate-pulse" size={16} />
+            <span className="text-red-300 text-xs sm:text-sm font-semibold tracking-wide">30+ Physics Simulations Available</span>
           </div>
           
-          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-red-500 via-rose-400 to-red-600 bg-clip-text text-transparent drop-shadow-2xl animate-gradient tracking-tight px-4">
+          <h1 className="title-responsive title-safe font-black mb-4 sm:mb-6 lg:mb-8 bg-gradient-to-r from-red-500 via-rose-400 to-red-600 bg-clip-text text-transparent drop-shadow-2xl animate-gradient tracking-tight break-words overflow-visible px-2">
             PhysVerse
           </h1>
           
-          <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-gray-100 mb-4 sm:mb-6 font-light tracking-wide px-4">
+          <p className="subtitle-responsive text-gray-100 mb-3 sm:mb-4 lg:mb-6 font-light tracking-wide break-words px-2">
             Where Physics Comes <span className="text-red-500 font-semibold">Alive</span>
           </p>
           
-          <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4">
+          <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-300 mb-6 sm:mb-8 lg:mb-12 max-w-4xl mx-auto leading-relaxed break-words px-4">
             Experience the beauty of physics through <span className="text-red-400 font-semibold">stunning 3D visualizations</span>. Create, explore, and share 
             interactive simulations from quantum mechanics to celestial dynamics.
           </p>
           
-          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-12 sm:mb-16 px-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8 sm:mb-12 lg:mb-16 px-4">
             <Link 
               to="/preview" 
-              className="group relative px-6 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg transition-all duration-300 shadow-2xl shadow-red-500/50 hover:shadow-red-500/80 hover:scale-105 sm:hover:scale-110 overflow-hidden active:scale-95"
+              className="group relative button-responsive touch-target bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 shadow-2xl shadow-red-500/50 hover:shadow-red-500/80 hover:scale-105 sm:hover:scale-110 overflow-hidden active:scale-95"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
-                <Rocket size={20} className="group-hover:rotate-12 transition-transform" />
-                Try It Now - Free!
+                <Rocket size={18} className="group-hover:rotate-12 transition-transform" />
+                <span className="text-sm sm:text-base lg:text-lg">Try It Now - Free!</span>
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-red-400 to-rose-400 opacity-0 group-hover:opacity-30 transition-opacity"></div>
             </Link>
             
             <Link 
               to="/login" 
-              className="px-6 sm:px-10 py-4 sm:py-5 bg-black/60 hover:bg-red-950/40 border-2 border-red-500/40 hover:border-red-500/70 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg transition-all duration-300 backdrop-blur-md hover:scale-105 sm:hover:scale-110 shadow-lg shadow-red-900/30 hover:shadow-red-500/40 active:scale-95"
+              className="button-responsive touch-target bg-black/60 hover:bg-red-950/40 border-2 border-red-500/40 hover:border-red-500/70 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 backdrop-blur-md hover:scale-105 sm:hover:scale-110 shadow-lg shadow-red-900/30 hover:shadow-red-500/40 active:scale-95 text-sm sm:text-base lg:text-lg"
             >
               Sign In
             </Link>
             
             <Link 
               to="/gallery" 
-              className="px-6 sm:px-10 py-4 sm:py-5 bg-black/60 hover:bg-gray-900/60 border-2 border-gray-700/50 hover:border-red-500/30 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg transition-all duration-300 backdrop-blur-md hover:scale-105 sm:hover:scale-110 active:scale-95"
+              className="button-responsive touch-target bg-black/60 hover:bg-gray-900/60 border-2 border-gray-700/50 hover:border-red-500/30 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 backdrop-blur-md hover:scale-105 sm:hover:scale-110 active:scale-95 text-sm sm:text-base lg:text-lg"
             >
               Explore Gallery
             </Link>
           </div>
 
           {/* Stats with glow effect */}
-          <div className="grid grid-cols-3 gap-3 sm:gap-6 md:gap-8 max-w-3xl mx-auto px-4">
-            <div className="group text-center p-3 sm:p-4 md:p-6 bg-red-950/20 border border-red-500/20 rounded-xl sm:rounded-2xl hover:border-red-500/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm active:scale-95">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-black bg-gradient-to-r from-red-400 to-rose-500 bg-clip-text text-transparent mb-1 sm:mb-2 group-hover:scale-110 transition-transform">30+</div>
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-8 max-w-3xl mx-auto px-2 sm:px-4">
+            <div className="group text-center card-responsive bg-red-950/20 border border-red-500/20 rounded-lg sm:rounded-xl lg:rounded-2xl hover:border-red-500/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm active:scale-95">
+              <div className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black bg-gradient-to-r from-red-400 to-rose-500 bg-clip-text text-transparent mb-1 sm:mb-2 group-hover:scale-110 transition-transform">30+</div>
               <div className="text-gray-300 text-xs sm:text-sm font-semibold tracking-wide">Simulations</div>
             </div>
-            <div className="group text-center p-3 sm:p-4 md:p-6 bg-red-950/20 border border-red-500/20 rounded-xl sm:rounded-2xl hover:border-red-500/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm active:scale-95">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-black bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent mb-1 sm:mb-2 group-hover:scale-110 transition-transform">60 FPS</div>
+            <div className="group text-center card-responsive bg-red-950/20 border border-red-500/20 rounded-lg sm:rounded-xl lg:rounded-2xl hover:border-red-500/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm active:scale-95">
+              <div className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent mb-1 sm:mb-2 group-hover:scale-110 transition-transform">60 FPS</div>
               <div className="text-gray-300 text-xs sm:text-sm font-semibold tracking-wide">Performance</div>
             </div>
-            <div className="group text-center p-3 sm:p-4 md:p-6 bg-red-950/20 border border-red-500/20 rounded-xl sm:rounded-2xl hover:border-red-500/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm active:scale-95">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-black bg-gradient-to-r from-rose-400 to-red-600 bg-clip-text text-transparent mb-1 sm:mb-2 group-hover:scale-110 transition-transform">100%</div>
+            <div className="group text-center card-responsive bg-red-950/20 border border-red-500/20 rounded-lg sm:rounded-xl lg:rounded-2xl hover:border-red-500/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm active:scale-95">
+              <div className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black bg-gradient-to-r from-rose-400 to-red-600 bg-clip-text text-transparent mb-1 sm:mb-2 group-hover:scale-110 transition-transform">100%</div>
               <div className="text-gray-300 text-xs sm:text-sm font-semibold tracking-wide">Browser-Based</div>
             </div>
           </div>
@@ -162,42 +162,81 @@ export default function LandingPage() {
       </div>
 
       {/* Physicist Carousel - Infinite Scroll */}
-      <div className="relative w-full py-24 overflow-hidden">
-        <div className="text-center mb-16 px-4">
-          <h2 className="text-5xl md:text-7xl font-black mb-6 bg-gradient-to-r from-red-400 via-rose-300 to-red-500 bg-clip-text text-transparent animate-gradient">
-            The Physicists Who Changed the World
+      <div className="relative w-full py-12 sm:py-16 lg:py-24 overflow-hidden">
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16 container-mobile">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-red-400 via-rose-300 to-red-500 bg-clip-text text-transparent animate-gradient break-words px-2">
+            The Scientists Who Changed the World
           </h2>
-          <p className="text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed break-words px-4">
             Standing on the shoulders of <span className="text-red-400 font-bold">giants</span> - explore the minds behind the simulations
           </p>
         </div>
 
-        {/* Infinite scrolling carousel */}
+        {/* Mobile: Horizontal scroll, Desktop: Infinite scroll */}
         <div className="relative">
-          {/* Gradient overlays for fade effect */}
-          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none"></div>
-          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-black via-black/80 to-transparent z-10 pointer-events-none"></div>
+          {/* Gradient overlays for fade effect - hidden on mobile */}
+          <div className="hidden sm:block absolute left-0 top-0 bottom-0 w-16 lg:w-32 bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none"></div>
+          <div className="hidden sm:block absolute right-0 top-0 bottom-0 w-16 lg:w-32 bg-gradient-to-l from-black via-black/80 to-transparent z-10 pointer-events-none"></div>
 
-          <div className="flex animate-scroll-left hover:pause-animation">
-            {/* Duplicate the array for seamless loop */}
+          {/* Mobile carousel */}
+          <div className="sm:hidden mobile-carousel flex gap-4 px-4 pb-4">
+            {physicists.map((physicist, index) => (
+              <Link
+                key={index}
+                to={`/physicist/${physicist.name.toLowerCase().replace(/\s+/g, '-')}`}
+                className="mobile-carousel-item w-80 flex-shrink-0 group block"
+              >
+                <div className="relative h-full bg-gradient-to-br from-red-950/60 via-black/80 to-red-900/50 backdrop-blur-xl border-2 border-red-500/30 rounded-2xl overflow-hidden shadow-2xl shadow-red-900/50 transition-all duration-500 hover:scale-105 hover:border-red-500/60 hover:shadow-red-500/40 cursor-pointer">
+                  {/* Mobile card content - simplified */}
+                  <div className="relative z-10 p-4">
+                    <div className="relative mb-4">
+                      <div className="relative w-full h-48 rounded-xl overflow-hidden border-2 border-red-500/50 shadow-xl">
+                        <img 
+                          src={physicist.imagePath}
+                          alt={physicist.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="320" height="192"%3E%3Crect fill="%23991b1b" width="320" height="192"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="monospace" font-size="16" fill="%23fca5a5"%3EPhoto Coming Soon%3C/text%3E%3C/svg%3E';
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+                        <div className="absolute bottom-0 left-0 right-0 p-3">
+                          <h3 className="text-xl font-black text-white mb-1 break-words">
+                            {physicist.name}
+                          </h3>
+                          <p className="text-red-300 text-xs font-bold">{physicist.years}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-red-950/40 border-l-4 border-red-500 rounded-r-lg">
+                      <p className="text-xs text-red-300 font-bold mb-1 uppercase tracking-wider">Contribution</p>
+                      <p className="text-sm text-white font-semibold leading-relaxed break-words">{physicist.contribution}</p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Desktop infinite scroll */}
+          <div className="hidden sm:flex animate-scroll-left hover:pause-animation gpu-accelerated">
             {[...physicists, ...physicists].map((physicist, index) => (
               <Link
                 key={index}
                 to={`/physicist/${physicist.name.toLowerCase().replace(/\s+/g, '-')}`}
-                className="flex-shrink-0 w-96 mx-4 group block"
+                className="flex-shrink-0 w-80 lg:w-96 mx-2 lg:mx-4 group block"
                 onMouseEnter={() => setIsHovering(index)}
                 onMouseLeave={() => setIsHovering(null)}
               >
                 <div className="relative h-full bg-gradient-to-br from-red-950/60 via-black/80 to-red-900/50 backdrop-blur-xl border-2 border-red-500/30 rounded-3xl overflow-hidden shadow-2xl shadow-red-900/50 transition-all duration-500 hover:scale-105 hover:border-red-500/60 hover:shadow-red-500/40 cursor-pointer">
-                  {/* Animated background glow */}
+                  {/* Desktop card content - full version */}
                   <div className="absolute inset-0 bg-gradient-to-br from-red-600/20 via-transparent to-rose-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   <div className="absolute top-0 right-0 w-40 h-40 bg-red-500/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
 
-                  <div className="relative z-10 p-8">
-                    {/* Image with premium styling */}
+                  <div className="relative z-10 p-6 lg:p-8">
                     <div className="relative mb-6">
                       <div className="absolute inset-0 bg-gradient-to-br from-red-500/40 to-rose-500/40 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-                      <div className="relative w-full h-80 rounded-2xl overflow-hidden border-4 border-red-500/50 shadow-2xl group-hover:border-red-400/80 transition-all duration-500">
+                      <div className="relative w-full h-64 lg:h-80 rounded-2xl overflow-hidden border-4 border-red-500/50 shadow-2xl group-hover:border-red-400/80 transition-all duration-500">
                         <img 
                           src={physicist.imagePath}
                           alt={physicist.name}
@@ -207,41 +246,31 @@ export default function LandingPage() {
                           }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
-                        
-                        {/* Name overlay on image */}
                         <div className="absolute bottom-0 left-0 right-0 p-6">
-                          <h3 className="text-3xl font-black text-white mb-1 drop-shadow-lg">
+                          <h3 className="text-2xl lg:text-3xl font-black text-white mb-1 drop-shadow-lg break-words">
                             {physicist.name}
                           </h3>
                           <p className="text-red-300 text-sm font-bold">{physicist.years}</p>
                         </div>
                       </div>
-                      
-                      {/* Decorative corners */}
-                      <div className="absolute -top-2 -left-2 w-6 h-6 border-t-4 border-l-4 border-red-500 rounded-tl-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <div className="absolute -bottom-2 -right-2 w-6 h-6 border-b-4 border-r-4 border-red-500 rounded-br-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
 
-                    {/* Contribution */}
                     <div className="mb-4 p-4 bg-red-950/40 border-l-4 border-red-500 rounded-r-xl backdrop-blur-sm group-hover:bg-red-950/60 transition-colors duration-300">
                       <p className="text-xs text-red-300 font-bold mb-2 uppercase tracking-wider">Major Contribution</p>
-                      <p className="text-sm text-white font-semibold leading-relaxed">{physicist.contribution}</p>
+                      <p className="text-sm text-white font-semibold leading-relaxed break-words">{physicist.contribution}</p>
                     </div>
 
-                    {/* Quote */}
                     <div className="mb-4 p-4 bg-black/50 border border-red-500/20 rounded-xl backdrop-blur-sm group-hover:border-red-500/40 transition-colors duration-300">
                       <p className="text-xs text-red-300 font-bold mb-2 uppercase tracking-wider">Famous Quote</p>
-                      <p className="text-sm text-gray-200 italic leading-relaxed">"{physicist.quote}"</p>
+                      <p className="text-sm text-gray-200 italic leading-relaxed break-words">"{physicist.quote}"</p>
                     </div>
 
-                    {/* Simulations */}
                     <div className="p-4 bg-gradient-to-r from-red-950/50 to-rose-950/50 border border-red-500/30 rounded-xl backdrop-blur-sm group-hover:from-red-950/70 group-hover:to-rose-950/70 transition-colors duration-300">
                       <p className="text-xs text-red-300 font-bold mb-2 uppercase tracking-wider">Featured In</p>
-                      <p className="text-sm text-white font-medium">{physicist.simulations}</p>
+                      <p className="text-sm text-white font-medium break-words">{physicist.simulations}</p>
                     </div>
                   </div>
 
-                  {/* Premium badge */}
                   <div className="absolute top-4 right-4 px-3 py-1 bg-gradient-to-r from-red-600 to-rose-600 rounded-full text-xs font-black text-white shadow-lg shadow-red-500/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     LEGEND
                   </div>
@@ -251,45 +280,61 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Pause on hover hint */}
-        <div className="text-center mt-12">
-          <p className="text-sm text-gray-500 font-semibold">
-            Hover over a card to pause and explore
+        {/* Interaction hint */}
+        <div className="text-center mt-8 sm:mt-12 container-mobile">
+          <p className="text-xs sm:text-sm text-gray-500 font-semibold">
+            <span className="sm:hidden">Swipe to explore more scientists</span>
+            <span className="hidden sm:inline">Hover over a card to pause and explore</span>
           </p>
         </div>
       </div>
 
       {/* Simulations Showcase */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <div className="text-center mb-16">
-          <h2 className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-red-400 to-rose-500 bg-clip-text text-transparent">
+      <div className="relative max-w-7xl mx-auto container-mobile py-12 sm:py-16 lg:py-24">
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black mb-4 bg-gradient-to-r from-red-400 to-rose-500 bg-clip-text text-transparent">
             Explore Our Simulations
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto px-4">
             From classical mechanics to chaotic systems, discover physics in <span className="text-red-400 font-semibold">stunning detail</span>
           </p>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
           {simulations.map((sim, index) => (
             <Link
               key={sim.name}
               to={`/simulation-info/${sim.name.toLowerCase().replace(/\s+/g, '-')}`}
               onMouseEnter={() => setIsHovering(index)}
               onMouseLeave={() => setIsHovering(null)}
-              className={`group relative p-8 bg-gradient-to-br from-red-950/30 to-black/60 backdrop-blur-sm border-2 ${
-                isHovering === index ? 'border-red-500/70 scale-110' : 'border-red-500/20'
-              } rounded-2xl transition-all duration-300 hover:shadow-2xl ${sim.glow} cursor-pointer block`}
+              className={`group relative bg-gradient-to-br from-red-950/30 to-black/60 backdrop-blur-sm border-2 ${
+                isHovering === index ? 'border-red-500/70 scale-105' : 'border-red-500/20'
+              } rounded-xl lg:rounded-2xl transition-all duration-300 hover:shadow-2xl ${sim.glow} cursor-pointer block touch-target overflow-hidden`}
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${sim.color} mb-4 group-hover:scale-125 group-hover:rotate-6 transition-all duration-300 shadow-lg ${sim.glow}`}>
-                <sim.icon className="text-white" size={28} />
+              <div className="p-4 sm:p-6 lg:p-8 h-full flex flex-col">
+                {/* Icon Container */}
+                <div className="flex justify-start mb-4 sm:mb-6">
+                  <div className={`inline-flex p-3 sm:p-4 rounded-xl lg:rounded-2xl bg-gradient-to-br ${sim.color} group-hover:scale-125 group-hover:rotate-6 transition-all duration-300 shadow-lg ${sim.glow}`}>
+                    <sim.icon className="text-white" size={20} />
+                  </div>
+                </div>
+                
+                {/* Text Content */}
+                <div className="flex-1 space-y-2 sm:space-y-3">
+                  <h3 className="text-sm sm:text-base lg:text-lg font-bold text-white break-words leading-tight">
+                    {sim.name}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-300 break-words leading-relaxed line-clamp-2">
+                    {sim.description}
+                  </p>
+                </div>
               </div>
-              <h3 className="text-lg font-bold mb-2 text-white">{sim.name}</h3>
-              <p className="text-sm text-gray-300">{sim.description}</p>
-              <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br from-red-500/0 to-rose-500/0 ${
+              
+              {/* Hover overlay */}
+              <div className={`absolute inset-0 rounded-xl lg:rounded-2xl bg-gradient-to-br from-red-500/0 to-rose-500/0 ${
                 isHovering === index ? 'from-red-500/10 to-rose-500/10' : ''
-              } transition-all duration-300`}></div>
+              } transition-all duration-300 pointer-events-none`}></div>
             </Link>
           ))}
         </div>

@@ -98,8 +98,8 @@ export default function ProfilePage() {
       setNewPassword('');
       setConfirmPassword('');
       setShowPasswordSection(false);
-    } catch (error: unknown) {
-      toast.error(error.response?.data?.error || 'Failed to change password');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || 'Failed to change password');
     } finally {
       setIsSaving(false);
     }
@@ -188,8 +188,8 @@ export default function ProfilePage() {
       toast.success('Account deleted successfully');
       logout();
       navigate('/');
-    } catch (error: unknown) {
-      toast.error(error.response?.data?.error || 'Failed to delete account');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || 'Failed to delete account');
       setIsSaving(false);
     }
   };

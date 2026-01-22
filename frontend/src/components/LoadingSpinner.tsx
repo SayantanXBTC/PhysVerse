@@ -11,13 +11,15 @@ export default function LoadingSpinner({ size = 'md', text }: LoadingSpinnerProp
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
+    <div className="flex flex-col items-center justify-center gap-4 gpu-accelerated">
       <div className="relative">
-        <div className={`${sizeClasses[size]} border-4 border-red-500/20 border-t-red-500 rounded-full animate-spin`}></div>
-        <div className={`absolute inset-0 ${sizeClasses[size]} border-4 border-transparent border-r-red-400 rounded-full animate-spin`} style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+        <div className={`${sizeClasses[size]} border-4 border-red-500/20 border-t-red-500 rounded-full animate-spin gpu-accelerated`}></div>
+        <div className={`absolute inset-0 ${sizeClasses[size]} border-4 border-transparent border-r-red-400 rounded-full animate-spin gpu-accelerated`} style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+        {/* Glow effect */}
+        <div className={`absolute inset-0 ${sizeClasses[size]} bg-red-500/10 rounded-full blur-xl animate-pulse`}></div>
       </div>
       {text && (
-        <p className="text-gray-400 text-sm animate-pulse">{text}</p>
+        <p className="text-gray-400 text-sm animate-pulse smooth-opacity">{text}</p>
       )}
     </div>
   );

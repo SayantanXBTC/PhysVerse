@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { authService } from './services/authService';
+import { gamificationService } from './services/gamificationService';
 import { useAuthStore } from './store/authStore';
 import LandingPage from './pages/LandingPage';
 import EnhancedLoginPage from './pages/EnhancedLoginPage';
@@ -55,6 +56,13 @@ function App() {
       logout();
     }
   }, [user, isError, setUser, logout, isAuthenticated]);
+
+  // Start achievement monitoring for authenticated users
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      gamificationService.startAchievementMonitoring();
+    }
+  }, [isAuthenticated, user]);
 
   return (
     <BrowserRouter>

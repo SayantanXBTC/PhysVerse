@@ -72,7 +72,7 @@ export default function SimulationEditorPage() {
         navigate(`/simulation/${data._id}`);
       }
     },
-    onError: (error: unknown) => {
+    onError: (error: any) => {
       console.error('Save error:', error);
       const errorMessage = error?.response?.data?.error || error?.message || 'Failed to save simulation';
       toast.error(errorMessage);

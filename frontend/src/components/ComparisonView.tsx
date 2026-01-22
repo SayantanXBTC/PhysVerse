@@ -56,7 +56,7 @@ export default function ComparisonView({ config, isRunning }: Props) {
           </div>
           <div className="flex-1">
             <SimulationCanvas
-              type={config.left.type}
+              simulationId={config.left.type}
               parameters={config.left.parameters}
               isRunning={isRunning}
             />
@@ -73,7 +73,7 @@ export default function ComparisonView({ config, isRunning }: Props) {
           </div>
           <div className="flex-1">
             <SimulationCanvas
-              type={config.right.type}
+              simulationId={config.right.type}
               parameters={config.right.parameters}
               isRunning={isRunning}
             />

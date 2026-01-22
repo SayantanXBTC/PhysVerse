@@ -33,8 +33,8 @@ export default function EnhancedSignupPage() {
       toast.success('Welcome to PhysVerse! 🎉');
       navigate('/onboarding', { replace: true }); // Replace history for better back button behavior
     },
-    onError: (err: unknown) => {
-      toast.error(err.response?.data?.error || 'Registration failed');
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error || 'Registration failed');
     }
   });
 

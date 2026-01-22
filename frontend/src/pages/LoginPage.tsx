@@ -17,8 +17,8 @@ export default function LoginPage() {
       setUser(data.user);
       navigate('/dashboard');
     },
-    onError: (err: unknown) => {
-      setError(err.response?.data?.error || 'Login failed');
+    onError: (err: any) => {
+      setError(err?.response?.data?.error || 'Login failed');
     }
   });
 

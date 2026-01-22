@@ -18,8 +18,8 @@ export default function SignupPage() {
       setUser(data.user);
       navigate('/dashboard');
     },
-    onError: (err: unknown) => {
-      setError(err.response?.data?.error || 'Registration failed');
+    onError: (err: any) => {
+      setError(err?.response?.data?.error || 'Registration failed');
     }
   });
 

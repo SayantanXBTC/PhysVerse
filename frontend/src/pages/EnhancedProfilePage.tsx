@@ -24,6 +24,7 @@ import toast from 'react-hot-toast';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ProgressBar from '../components/ProgressBar';
 import AchievementCard from '../components/AchievementCard';
+import PremiumPhotoUpload from '../components/PremiumPhotoUpload';
 
 export default function EnhancedProfilePage() {
   const navigate = useNavigate();
@@ -246,28 +247,12 @@ export default function EnhancedProfilePage() {
           <div className="lg:col-span-1 space-y-6">
             {/* Profile Card */}
             <div className="glass-red p-8 rounded-2xl text-center animate-scaleIn">
-              <div className="relative inline-block mb-6">
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center text-white text-4xl font-black shadow-2xl shadow-red-500/50 overflow-hidden">
-                  {avatar ? (
-                    <img src={avatar} alt={name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span>{name.charAt(0).toUpperCase()}</span>
-                  )}
-                </div>
-                <label 
-                  htmlFor="avatarUpload"
-                  className="absolute bottom-0 right-0 p-2 bg-red-600 hover:bg-red-500 rounded-full shadow-lg transition-all duration-300 hover:scale-110 cursor-pointer"
-                  aria-label="Change avatar"
-                >
-                  <Camera size={16} />
-                  <input
-                    id="avatarUpload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleAvatarChange}
-                  />
-                </label>
+              <div className="mb-6">
+                <PremiumPhotoUpload
+                  currentAvatar={avatar}
+                  onPhotoChange={setAvatar}
+                  isUploading={isSaving}
+                />
               </div>
 
               <h2 className="text-2xl font-bold mb-1">{name}</h2>

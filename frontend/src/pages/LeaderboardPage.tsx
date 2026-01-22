@@ -1,14 +1,42 @@
 import { useQuery } from '@tanstack/react-query';
-import { Trophy, Medal, Crown, TrendingUp, Award } from 'lucide-react';
+import { Trophy, Medal, Crown, TrendingUp, Award, RefreshCw } from 'lucide-react';
 import { gamificationService } from '../services/gamificationService';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useState, useEffect } from 'react';
 
 export default function LeaderboardPage() {
-  const { data, isLoading } = useQuery({
+  const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ['leaderboard'],
     queryFn: gamificationService.getLeaderboard,
-    refetchInterval: 30000 // Refetch every 30 seconds
+    refetchInterval: 10000, // Refetch every 10 seconds for real-time updates
+    refetchIntervalInBackground: true,
   });
+
+  // Update last update time when data changes
+  useEffect(() => {
+    if (data) {
+      setLastUpdate(new Date());
+      setIsRefreshing(false);
+    }
+  }, [data]);
+
+  // Manual refresh function
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+  };
+
+  const getTimeAgo = (date: Date) => {
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h ago`;
+  };
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -44,6 +72,8 @@ export default function LeaderboardPage() {
     );
   }
 
+  const leaderboard = (data as any)?.leaderboard || [];
+
   return (
     <div className="min-h-screen bg-black">
       {/* Background effects */}
@@ -52,159 +82,99 @@ export default function LeaderboardPage() {
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
       </div>
 
-      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="relative max-w-5xl mx-auto container-mobile py-8 sm:py-12">
         {/* Header */}
-        <div className="text-center mb-12 animate-fadeInUp">
-          <div className="inline-flex items-center space-x-2 px-4 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full mb-6">
-            <Trophy className="text-yellow-400" size={20} />
-            <span className="text-yellow-300 text-sm font-medium">Global Rankings</span>
+        <div className="text-center mb-8 sm:mb-12 animate-fadeInUp">
+          <div className="inline-flex items-center space-x-2 px-3 sm:px-4 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full mb-4 sm:mb-6">
+            <Trophy className="text-yellow-400" size={16} />
+            <span className="text-yellow-300 text-xs sm:text-sm font-medium">Global Rankings</span>
           </div>
-          <h1 className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
+          
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-yellow-400 via-orange-300 to-red-500 bg-clip-text text-transparent animate-gradient">
             Leaderboard
           </h1>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Top physicists ranked by level, XP, and achievements
+          <p className="text-base sm:text-lg lg:text-xl text-gray-300 max-w-2xl mx-auto px-4">
+            Compete with physicists worldwide and climb the ranks
           </p>
+
+          {/* Real-time Update Status */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mt-4 sm:mt-6 px-4">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              <span className="text-green-300 text-xs sm:text-sm font-medium">Live Updates</span>
+            </div>
+            
+            <button
+              onClick={handleManualRefresh}
+              disabled={isRefreshing}
+              className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-full transition-colors disabled:opacity-50 touch-target"
+            >
+              <RefreshCw className={`w-4 h-4 text-blue-400 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="text-blue-300 text-xs sm:text-sm font-medium">
+                {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              </span>
+            </button>
+            
+            <div className="text-xs text-gray-500">
+              Updated {getTimeAgo(lastUpdate)}
+            </div>
+          </div>
         </div>
 
-        {/* Top 3 Podium */}
-        {data?.leaderboard && data.leaderboard.length >= 3 && (
-          <div className="grid grid-cols-3 gap-4 mb-12 animate-scaleIn">
-            {/* 2nd Place */}
-            <div className="flex flex-col items-center pt-12">
-              <div className="relative mb-4">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center shadow-2xl shadow-gray-500/50 overflow-hidden border-4 border-gray-300">
-                  {data.leaderboard[1].avatar ? (
-                    <img src={data.leaderboard[1].avatar} alt={data.leaderboard[1].name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-3xl font-black text-white">{data.leaderboard[1].name.charAt(0)}</span>
-                  )}
-                </div>
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-12 h-12 bg-gradient-to-br from-gray-400 to-gray-600 rounded-full flex items-center justify-center border-4 border-black shadow-lg">
-                  <span className="text-xl font-black text-white">2</span>
-                </div>
-              </div>
-              <h3 className="text-lg font-bold text-white mb-1 text-center">{data.leaderboard[1].name}</h3>
-              <p className="text-sm text-gray-400 mb-2">Level {data.leaderboard[1].level}</p>
-              <div className="flex items-center gap-1 text-yellow-400 text-sm">
-                <Award size={14} />
-                <span>{data.leaderboard[1].achievementCount}</span>
-              </div>
-            </div>
-
-            {/* 1st Place */}
-            <div className="flex flex-col items-center">
-              <div className="relative mb-4">
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center shadow-2xl shadow-yellow-500/50 overflow-hidden border-4 border-yellow-300 animate-pulse">
-                  {data.leaderboard[0].avatar ? (
-                    <img src={data.leaderboard[0].avatar} alt={data.leaderboard[0].name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-4xl font-black text-white">{data.leaderboard[0].name.charAt(0)}</span>
-                  )}
-                </div>
-                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
-                  <Crown className="text-yellow-400 animate-bounce" size={48} />
-                </div>
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-14 h-14 bg-gradient-to-br from-yellow-400 to-orange-600 rounded-full flex items-center justify-center border-4 border-black shadow-lg">
-                  <span className="text-2xl font-black text-white">1</span>
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-1 text-center">{data.leaderboard[0].name}</h3>
-              <p className="text-sm text-gray-400 mb-2">Level {data.leaderboard[0].level}</p>
-              <div className="flex items-center gap-1 text-yellow-400">
-                <Award size={16} />
-                <span className="font-bold">{data.leaderboard[0].achievementCount}</span>
-              </div>
-            </div>
-
-            {/* 3rd Place */}
-            <div className="flex flex-col items-center pt-12">
-              <div className="relative mb-4">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-400 to-amber-600 flex items-center justify-center shadow-2xl shadow-orange-500/50 overflow-hidden border-4 border-orange-300">
-                  {data.leaderboard[2].avatar ? (
-                    <img src={data.leaderboard[2].avatar} alt={data.leaderboard[2].name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-3xl font-black text-white">{data.leaderboard[2].name.charAt(0)}</span>
-                  )}
-                </div>
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-12 h-12 bg-gradient-to-br from-orange-400 to-amber-600 rounded-full flex items-center justify-center border-4 border-black shadow-lg">
-                  <span className="text-xl font-black text-white">3</span>
-                </div>
-              </div>
-              <h3 className="text-lg font-bold text-white mb-1 text-center">{data.leaderboard[2].name}</h3>
-              <p className="text-sm text-gray-400 mb-2">Level {data.leaderboard[2].level}</p>
-              <div className="flex items-center gap-1 text-yellow-400 text-sm">
-                <Award size={14} />
-                <span>{data.leaderboard[2].achievementCount}</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Full Leaderboard */}
-        <div className="glass-red rounded-2xl overflow-hidden animate-slideInUp">
-          <div className="p-6 border-b border-gray-700/50">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <TrendingUp className="text-red-400" size={24} />
-              All Rankings
-            </h2>
-          </div>
-
-          <div className="divide-y divide-gray-700/50">
-            {data?.leaderboard?.map((user: any) => (
+        {leaderboard.length > 0 ? (
+          <div className="space-y-3 sm:space-y-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6 text-white">Rankings</h2>
+            
+            {leaderboard.map((user: any, index: number) => (
               <div
-                key={user.userId}
-                className={`p-6 bg-gradient-to-r ${getRankBg(user.rank)} hover:scale-[1.02] transition-all duration-300 border-l-4`}
+                key={user.id || index}
+                className={`flex items-center card-responsive bg-gradient-to-r ${getRankBg(index + 1)} backdrop-blur-sm border rounded-xl sm:rounded-2xl hover:scale-[1.02] transition-all duration-300 group`}
               >
-                <div className="flex items-center gap-4">
-                  {/* Rank */}
-                  <div className="w-16 flex items-center justify-center">
-                    {getRankIcon(user.rank)}
-                  </div>
+                {/* Rank */}
+                <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 mr-3 sm:mr-6 flex-shrink-0">
+                  {getRankIcon(index + 1)}
+                </div>
 
-                  {/* Avatar */}
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-red-600 to-rose-600 flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0">
-                    {user.avatar ? (
-                      <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-xl font-black text-white">{user.name.charAt(0)}</span>
-                    )}
-                  </div>
+                {/* Avatar */}
+                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-red-600 to-rose-600 flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0">
+                  {user.avatar ? (
+                    <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-sm sm:text-xl font-black text-white">{user.name?.charAt(0) || '?'}</span>
+                  )}
+                </div>
 
-                  {/* User Info */}
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-white">{user.name}</h3>
-                    <div className="flex items-center gap-4 mt-1">
-                      <span className="text-sm text-gray-400">
-                        Level <span className="font-bold text-white">{user.level}</span>
-                      </span>
-                      <span className="text-sm text-gray-400">
-                        <span className="font-bold text-yellow-400">{user.xp.toLocaleString()}</span> XP
-                      </span>
-                      <span className="text-sm text-gray-400 flex items-center gap-1">
-                        <Award size={14} className="text-yellow-400" />
-                        <span className="font-bold text-white">{user.achievementCount}</span>
-                      </span>
-                    </div>
+                {/* User Info */}
+                <div className="flex-1 ml-3 sm:ml-4 min-w-0">
+                  <h3 className="text-sm sm:text-lg font-bold text-white group-hover:text-yellow-300 transition-colors truncate">
+                    {user.name || 'Unknown User'}
+                  </h3>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-gray-400">
+                    <span className="flex items-center gap-1">
+                      <TrendingUp size={12} />
+                      Level {user.level || 1}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Award size={12} />
+                      {user.achievements?.length || 0} achievements
+                    </span>
                   </div>
+                </div>
 
-                  {/* Level Badge */}
-                  <div className="hidden md:block">
-                    <div className="px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 rounded-full">
-                      <span className="text-sm font-bold text-white">Lvl {user.level}</span>
-                    </div>
+                {/* XP */}
+                <div className="text-right flex-shrink-0">
+                  <div className="text-lg sm:text-2xl font-black text-white mb-1">
+                    {(user.xp || 0).toLocaleString()}
                   </div>
+                  <div className="text-xs sm:text-sm text-gray-400">XP</div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Empty State */}
-        {(!data?.leaderboard || data.leaderboard.length === 0) && (
-          <div className="text-center py-20">
-            <Trophy className="mx-auto mb-4 text-gray-600" size={64} />
-            <h3 className="text-2xl font-bold text-gray-400 mb-2">No rankings yet</h3>
+        ) : (
+          <div className="text-center py-16 sm:py-20">
+            <Trophy className="mx-auto mb-4 text-gray-600" size={48} />
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-400 mb-2">No rankings yet</h3>
             <p className="text-gray-500">Be the first to climb the leaderboard!</p>
           </div>
         )}

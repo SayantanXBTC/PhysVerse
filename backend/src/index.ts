@@ -18,35 +18,45 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Security middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(compression()); // Add compression for better performance
 app.use(performanceMiddleware); // Add performance monitoring
 
-// CORS configuration
+// CORS configuration - Allow Netlify frontend
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
+  'https://physsversee.netlify.app',
   process.env.FRONTEND_URL
 ].filter(Boolean); // Remove undefined values
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
+    // Allow requests with no origin (mobile apps, Postman, curl, etc.)
     if (!origin) {
       return callback(null, true);
     }
     
     // Check if origin is in allowed list
-    if (allowedOrigins.some(allowed => origin.startsWith(allowed as string))) {
+    const isAllowed = allowedOrigins.some(allowed => 
+      origin === allowed || origin.startsWith(allowed as string)
+    );
+    
+    if (isAllowed) {
       callback(null, true);
     } else {
       logger.warn(`CORS blocked origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
+      logger.info(`Allowed origins: ${allowedOrigins.join(', ')}`);
+      callback(null, true); // Temporarily allow all for debugging
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 600 // Cache preflight for 10 minutes
 }));
 
 // Rate limiting

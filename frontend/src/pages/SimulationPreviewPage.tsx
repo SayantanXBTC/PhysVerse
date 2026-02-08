@@ -78,9 +78,9 @@ export default function SimulationPreviewPage() {
         <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse [animation-delay:1s]"></div>
       </div>
 
-      <div className="relative bg-black/80 backdrop-blur-xl border-b-2 border-red-500/30 px-6 py-4 shadow-lg shadow-red-900/20">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
+      <div className="relative bg-black/80 backdrop-blur-xl border-b-2 border-red-500/30 px-3 sm:px-6 py-3 sm:py-4 shadow-lg shadow-red-900/20">
+        <div className="flex justify-between items-center gap-2">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <Link
               to="/"
               className="p-2 hover:bg-red-950/40 border border-transparent hover:border-red-500/30 rounded-lg transition-all duration-300"
@@ -89,8 +89,8 @@ export default function SimulationPreviewPage() {
               <ArrowLeft size={20} />
             </Link>
             <div className="flex items-center space-x-2">
-              <Sparkles className="text-red-400 animate-pulse" size={24} />
-              <h1 className="text-2xl font-black bg-gradient-to-r from-red-400 to-rose-500 bg-clip-text text-transparent">
+              <Sparkles className="text-red-400 animate-pulse" size={20} sm:size={24} />
+              <h1 className="text-lg sm:text-2xl font-black bg-gradient-to-r from-red-400 to-rose-500 bg-clip-text text-transparent">
                 Try PhysVerse
               </h1>
             </div>
@@ -98,15 +98,16 @@ export default function SimulationPreviewPage() {
 
           <Link
             to="/signup"
-            className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 rounded-xl font-bold transition-all duration-300 shadow-lg shadow-red-500/40 hover:shadow-red-500/60 hover:scale-105"
+            className="px-3 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 rounded-xl text-sm sm:text-base font-bold transition-all duration-300 shadow-lg shadow-red-500/40 hover:shadow-red-500/60 hover:scale-105"
           >
             Sign Up to Save
           </Link>
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden relative">
-        <div className="flex-1 relative flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+        {/* Canvas Area */}
+        <div className="flex-1 relative flex flex-col overflow-hidden order-2 lg:order-1">
           <div className={showChart ? 'flex-1 overflow-hidden' : 'h-full overflow-hidden'}>
             <SimulationCanvas
               simulationId={simulationId}
@@ -116,7 +117,7 @@ export default function SimulationPreviewPage() {
           </div>
           
           {showChart && (
-            <div className="h-96 flex-shrink-0 p-4 bg-black/80 border-t-2 border-red-500/30">
+            <div className="h-64 lg:h-96 flex-shrink-0 p-2 lg:p-4 bg-black/80 border-t-2 border-red-500/30">
               <SimulationDataChart
                 key={chartKey}
                 data={chartData}
@@ -132,8 +133,9 @@ export default function SimulationPreviewPage() {
           )}
         </div>
 
-        <div className="w-96 bg-black/60 backdrop-blur-xl border-l-2 border-red-500/30 overflow-y-auto shadow-2xl shadow-red-900/20">
-          <div className="p-6 space-y-6">
+        {/* Controls Sidebar */}
+        <div className="w-full lg:w-96 bg-black/60 backdrop-blur-xl border-t-2 lg:border-t-0 lg:border-l-2 border-red-500/30 overflow-y-auto shadow-2xl shadow-red-900/20 order-1 lg:order-2 max-h-[60vh] lg:max-h-none">
+          <div className="p-4 lg:p-6 space-y-4 lg:space-y-6">
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
                 <button

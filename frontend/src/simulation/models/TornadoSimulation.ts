@@ -21,32 +21,29 @@ export class TornadoSimulation implements PhysicsSimulation {
   };
 
   parameters: Record<string, SimulationParameterDefinition> = {
-    strength: {
-      label: 'Vortex Strength',
+    efScale: {
+      label: 'EF Scale',
       type: 'number',
-      default: 5,
-      min: 1,
-      max: 10,
-      step: 0.5,
-      description: 'Tornado wind speed (EF scale)'
+      default: 3,
+      min: 0,
+      max: 5,
+      step: 1,
+      description: 'Enhanced Fujita Scale (0-5)'
     },
     height: {
-      label: 'Height',
+      label: 'Height (m)',
       type: 'number',
-      default: 10,
-      min: 4,
-      max: 15,
-      step: 1,
-      description: 'Tornado funnel height'
+      default: 500,
+      min: 200,
+      max: 1000,
+      step: 100,
+      description: 'Tornado funnel height in meters'
     },
-    debris: {
-      label: 'Debris Amount',
-      type: 'number',
-      default: 150,
-      min: 50,
-      max: 300,
-      step: 50,
-      description: 'Amount of debris particles'
+    showLightning: {
+      label: 'Lightning',
+      type: 'boolean',
+      default: true,
+      description: 'Show electrical discharge'
     }
   };
 
@@ -55,25 +52,42 @@ export class TornadoSimulation implements PhysicsSimulation {
   private funnel: THREE.Mesh | null = null;
   private ground: THREE.Mesh | null = null;
   private debrisData: DebrisParticle[] = [];
+  private satelliteVortices: THREE.Mesh[] = [];
+  private lightning: THREE.Line[] = [];
+  private cloudLayer: THREE.Mesh | null = null;
   private params: Record<string, unknown> = {};
   private time = 0;
+  private lightningTimer = 0;
   private scene: THREE.Scene | null = null;
+  private readonly SCALE_FACTOR = 0.02; // Convert meters to scene units
 
   initialize(scene: THREE.Scene, params: Record<string, unknown>): void {
     this.params = params;
     this.scene = scene;
     this.time = 0;
     this.debrisData = [];
+    this.satelliteVortices = [];
+    this.lightning = [];
+    this.lightningTimer = 0;
 
-    const height = params.height as number || 10;
-    const debrisCount = params.debris as number || 150;
+    const efScale = params.efScale as number || 3;
+    const heightMeters = params.height as number || 500;
+    const height = heightMeters * this.SCALE_FACTOR;
+    const showLightning = params.showLightning !== false;
+    
+    // EF Scale wind speeds (m/s)
+    const windSpeeds = [29, 38, 50, 61, 74, 89]; // EF0-EF5
+    const windSpeed = windSpeeds[Math.min(efScale, 5)];
+    const strength = windSpeed * 0.1; // Scale for visualization
+    
+    const debrisCount = 100 + efScale * 30;
 
-    // Ground plane
+    // Ground plane with texture
     const groundGeometry = new THREE.CircleGeometry(15, 64);
     const groundMaterial = new THREE.MeshStandardMaterial({
-      color: 0x4a5a3a,
-      roughness: 0.9,
-      metalness: 0.1
+      color: 0x3a4a2a,
+      roughness: 0.95,
+      metalness: 0.05
     });
     this.ground = new THREE.Mesh(groundGeometry, groundMaterial);
     this.ground.rotation.x = -Math.PI / 2;
@@ -81,18 +95,54 @@ export class TornadoSimulation implements PhysicsSimulation {
     this.ground.receiveShadow = true;
     scene.add(this.ground);
 
-    // Tornado funnel (semi-transparent cone)
-    const funnelGeometry = new THREE.CylinderGeometry(0.3, 2.5, height, 32, 20, true);
-    const funnelMaterial = new THREE.MeshStandardMaterial({
-      color: 0x808080,
+    // Atmospheric cloud layer
+    const cloudGeometry = new THREE.CylinderGeometry(6, 8, 2, 32, 1, true);
+    const cloudMaterial = new THREE.MeshStandardMaterial({
+      color: 0x505050,
       transparent: true,
-      opacity: 0.15,
-      side: THREE.DoubleSide,
-      wireframe: false
+      opacity: 0.4,
+      side: THREE.DoubleSide
+    });
+    this.cloudLayer = new THREE.Mesh(cloudGeometry, cloudMaterial);
+    this.cloudLayer.position.y = height + 1;
+    scene.add(this.cloudLayer);
+
+    // Main tornado funnel with rotating texture
+    const funnelGeometry = new THREE.CylinderGeometry(0.2, 2.5, height, 64, 32, true);
+    const funnelMaterial = new THREE.MeshStandardMaterial({
+      color: 0x707070,
+      transparent: true,
+      opacity: 0.25,
+      side: THREE.DoubleSide
     });
     this.funnel = new THREE.Mesh(funnelGeometry, funnelMaterial);
     this.funnel.position.y = height / 2;
+    this.funnel.castShadow = true;
     scene.add(this.funnel);
+
+    // Satellite vortices (smaller tornadoes around main)
+    for (let i = 0; i < 2; i++) {
+      const angle = (i / 2) * Math.PI * 2;
+      const distance = 4 + Math.random();
+      const satHeight = height * (0.3 + Math.random() * 0.3);
+      
+      const satGeometry = new THREE.CylinderGeometry(0.1, 0.8, satHeight, 32, 16, true);
+      const satMaterial = new THREE.MeshStandardMaterial({
+        color: 0x808080,
+        transparent: true,
+        opacity: 0.2,
+        side: THREE.DoubleSide
+      });
+      const satellite = new THREE.Mesh(satGeometry, satMaterial);
+      satellite.position.set(
+        Math.cos(angle) * distance,
+        satHeight / 2,
+        Math.sin(angle) * distance
+      );
+      satellite.userData = { angle, distance, baseHeight: satHeight };
+      scene.add(satellite);
+      this.satelliteVortices.push(satellite);
+    }
 
     // Dust/air particles (main vortex visualization)
     const dustCount = 500;
@@ -199,9 +249,34 @@ export class TornadoSimulation implements PhysicsSimulation {
 
     const dt = Math.min(delta, 0.05);
     this.time += dt;
+    this.lightningTimer += dt;
     
-    const strength = this.params.strength as number || 5;
-    const height = this.params.height as number || 10;
+    const efScale = this.params.efScale as number || 3;
+    const windSpeeds = [29, 38, 50, 61, 74, 89];
+    const windSpeed = windSpeeds[Math.min(efScale, 5)];
+    const strength = windSpeed * 0.1;
+    const heightMeters = this.params.height as number || 500;
+    const height = heightMeters * this.SCALE_FACTOR;
+    const showLightning = this.params.showLightning !== false;
+
+    // Lightning strikes
+    if (showLightning && this.lightningTimer > 1 + Math.random() * 2) {
+      this.createLightning();
+      this.lightningTimer = 0;
+    }
+
+    // Update existing lightning
+    this.lightning = this.lightning.filter(bolt => {
+      const material = bolt.material as THREE.LineBasicMaterial;
+      material.opacity -= dt * 3;
+      if (material.opacity <= 0) {
+        bolt.parent?.remove(bolt);
+        bolt.geometry.dispose();
+        material.dispose();
+        return false;
+      }
+      return true;
+    });
 
     // Update dust particles (smooth vortex motion)
     const dustPositions = (this.dustParticles.geometry.attributes.position as THREE.BufferAttribute).array as Float32Array;
@@ -312,6 +387,59 @@ export class TornadoSimulation implements PhysicsSimulation {
       this.funnel.position.x = wobble;
       this.funnel.position.z = Math.cos(this.time * 2) * 0.1;
     }
+
+    // Animate satellite vortices
+    this.satelliteVortices.forEach((satellite, idx) => {
+      const userData = satellite.userData as { angle: number; distance: number; baseHeight: number };
+      userData.angle += dt * strength * 0.2;
+      satellite.position.x = Math.cos(userData.angle) * userData.distance;
+      satellite.position.z = Math.sin(userData.angle) * userData.distance;
+      satellite.rotation.y += dt * strength * 0.5;
+    });
+
+    // Animate cloud layer
+    if (this.cloudLayer) {
+      this.cloudLayer.rotation.y += dt * 0.1;
+      const material = this.cloudLayer.material as THREE.MeshStandardMaterial;
+      material.opacity = 0.35 + Math.sin(this.time) * 0.05;
+    }
+  }
+
+  private createLightning(): void {
+    if (!this.scene) return;
+
+    const startY = (this.params.height as number || 500) * this.SCALE_FACTOR;
+    const points: THREE.Vector3[] = [];
+    
+    // Start from cloud
+    let currentPos = new THREE.Vector3(
+      (Math.random() - 0.5) * 4,
+      startY,
+      (Math.random() - 0.5) * 4
+    );
+    points.push(currentPos.clone());
+
+    // Jagged path to ground
+    const segments = 8;
+    for (let i = 0; i < segments; i++) {
+      currentPos = currentPos.clone().add(new THREE.Vector3(
+        (Math.random() - 0.5) * 0.5,
+        -startY / segments,
+        (Math.random() - 0.5) * 0.5
+      ));
+      points.push(currentPos);
+    }
+
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({
+      color: 0xaaccff,
+      transparent: true,
+      opacity: 1,
+      linewidth: 3
+    });
+    const bolt = new THREE.Line(geometry, material);
+    this.scene.add(bolt);
+    this.lightning.push(bolt);
   }
 
   reset(): void {
@@ -342,7 +470,24 @@ export class TornadoSimulation implements PhysicsSimulation {
       this.ground.geometry.dispose();
       (this.ground.material as THREE.Material).dispose();
     }
+    if (this.cloudLayer) {
+      this.cloudLayer.parent?.remove(this.cloudLayer);
+      this.cloudLayer.geometry.dispose();
+      (this.cloudLayer.material as THREE.Material).dispose();
+    }
+    this.satelliteVortices.forEach(sat => {
+      sat.parent?.remove(sat);
+      sat.geometry.dispose();
+      (sat.material as THREE.Material).dispose();
+    });
+    this.lightning.forEach(bolt => {
+      bolt.parent?.remove(bolt);
+      bolt.geometry.dispose();
+      (bolt.material as THREE.Material).dispose();
+    });
     this.debrisData = [];
+    this.satelliteVortices = [];
+    this.lightning = [];
   }
 
   exportData(): unknown {

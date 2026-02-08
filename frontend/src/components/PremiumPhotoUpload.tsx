@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Camera, Upload, X, RotateCcw, Crop, Sparkles, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -20,6 +21,13 @@ export default function PremiumPhotoUpload({
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Update preview when currentAvatar changes
+  useEffect(() => {
+    if (currentAvatar) {
+      setPreview(currentAvatar);
+    }
+  }, [currentAvatar]);
 
   const handleFileSelect = useCallback((file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -91,11 +99,14 @@ export default function PremiumPhotoUpload({
     try {
       const croppedImage = await cropImage(originalImage);
       setPreview(croppedImage);
-      onPhotoChange(croppedImage);
       setShowCropModal(false);
-      toast.success('Photo updated successfully!');
+      setOriginalImage(null);
+      onPhotoChange(croppedImage);
+      // Don't show toast here - let the parent component handle it
     } catch (error) {
       toast.error('Failed to process image');
+      setShowCropModal(false);
+      setOriginalImage(null);
     }
   }, [originalImage, cropImage, onPhotoChange]);
 
@@ -223,20 +234,21 @@ export default function PremiumPhotoUpload({
         />
       </div>
 
-      {/* Crop Modal */}
-      <AnimatePresence>
-        {showCropModal && originalImage && (
+      {/* Crop Modal - Rendered via Portal */}
+      {showCropModal && originalImage && createPortal(
+        <AnimatePresence>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+            style={{ zIndex: 9999 }}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border border-gray-700"
+              className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border border-gray-700 shadow-2xl"
             >
               <div className="text-center mb-6">
                 <h3 className="text-xl font-bold text-white mb-2">Crop Your Photo</h3>
@@ -263,14 +275,17 @@ export default function PremiumPhotoUpload({
               {/* Actions */}
               <div className="flex gap-3">
                 <button
-                  onClick={() => setShowCropModal(false)}
-                  className="flex-1 touch-target px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm sm:text-base"
+                  onClick={() => {
+                    setShowCropModal(false);
+                    setOriginalImage(null);
+                  }}
+                  className="flex-1 touch-target px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm sm:text-base font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCropConfirm}
-                  className="flex-1 touch-target px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+                  className="flex-1 touch-target px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base font-semibold"
                 >
                   <Crop className="w-4 h-4" />
                   Crop & Save
@@ -278,8 +293,9 @@ export default function PremiumPhotoUpload({
               </div>
             </motion.div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 }

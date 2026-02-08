@@ -100,11 +100,25 @@ export default function EnhancedProfilePage() {
       const data = await authService.updateProfile(name, avatar || undefined);
       setUser(data.user);
       toast.success('Profile updated successfully!');
+      loadUserData(); // Reload to get updated data
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to update profile');
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handlePhotoChange = (photoData: string) => {
+    setAvatar(photoData);
+    // Auto-save the avatar
+    authService.updateProfile(name, photoData)
+      .then((data) => {
+        setUser(data.user);
+        toast.success('Profile photo updated successfully!');
+      })
+      .catch((error: any) => {
+        toast.error(error.response?.data?.error || 'Failed to update photo');
+      });
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -250,8 +264,8 @@ export default function EnhancedProfilePage() {
               <div className="mb-6">
                 <PremiumPhotoUpload
                   currentAvatar={avatar}
-                  onPhotoChange={setAvatar}
-                  isUploading={isSaving}
+                  onPhotoChange={handlePhotoChange}
+                  isUploading={false}
                 />
               </div>
 

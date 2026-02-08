@@ -1,9 +1,33 @@
-import { Link } from 'react-router-dom';
-import { Rocket, Zap, Globe, Lock, Sparkles, Atom, Waves, Wind, Orbit, FlaskConical, Brain, TrendingUp, Trophy, BookOpen, Target, Calculator } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Rocket, Zap, Globe, Lock, Sparkles, Atom, Waves, Wind, Orbit, FlaskConical, Brain, TrendingUp, Trophy, BookOpen, Target, Calculator, LogOut } from 'lucide-react';
 import { useState } from 'react';
+import { useAuthStore } from '../store/authStore';
+import toast from 'react-hot-toast';
 
 export default function LandingPage() {
   const [isHovering, setIsHovering] = useState<number | null>(null);
+  const { isAuthenticated, logout, user } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    toast.success('Logged out successfully');
+    navigate('/');
+  };
+
+  // Function to create URL-safe slugs
+  const createSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/ö/g, 'o')
+      .replace(/ä/g, 'a')
+      .replace(/ü/g, 'u')
+      .replace(/ß/g, 'ss')
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+      .trim();
+  };
 
   const physicists = [
     { 
@@ -116,32 +140,68 @@ export default function LandingPage() {
             interactive simulations from quantum mechanics to celestial dynamics.
           </p>
           
-          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8 sm:mb-12 lg:mb-16 px-4">
-            <Link 
-              to="/preview" 
-              className="group relative button-responsive touch-target bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 shadow-2xl shadow-red-500/50 hover:shadow-red-500/80 hover:scale-105 sm:hover:scale-110 overflow-hidden active:scale-95"
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                <Rocket size={18} className="group-hover:rotate-12 transition-transform" />
-                <span className="text-sm sm:text-base lg:text-lg">Try It Now - Free!</span>
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-red-400 to-rose-400 opacity-0 group-hover:opacity-30 transition-opacity"></div>
-            </Link>
-            
-            <Link 
-              to="/login" 
-              className="button-responsive touch-target bg-black/60 hover:bg-red-950/40 border-2 border-red-500/40 hover:border-red-500/70 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 backdrop-blur-md hover:scale-105 sm:hover:scale-110 shadow-lg shadow-red-900/30 hover:shadow-red-500/40 active:scale-95 text-sm sm:text-base lg:text-lg"
-            >
-              Sign In
-            </Link>
-            
-            <Link 
-              to="/gallery" 
-              className="button-responsive touch-target bg-black/60 hover:bg-gray-900/60 border-2 border-gray-700/50 hover:border-red-500/30 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 backdrop-blur-md hover:scale-105 sm:hover:scale-110 active:scale-95 text-sm sm:text-base lg:text-lg"
-            >
-              Explore Gallery
-            </Link>
-          </div>
+          {/* Conditional Button Rendering */}
+          {isAuthenticated ? (
+            // Authenticated User - Show Sign Out Button
+            <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8 sm:mb-12 lg:mb-16 px-4">
+              <div className="flex items-center gap-3 px-6 py-3 bg-red-950/30 border border-red-500/30 rounded-xl backdrop-blur-sm">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-600 to-rose-600 flex items-center justify-center">
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    <span className="text-white text-sm font-bold">{user?.name?.charAt(0) || 'U'}</span>
+                  )}
+                </div>
+                <span className="text-white font-semibold">Welcome, {user?.name || 'User'}!</span>
+              </div>
+              
+              <button
+                onClick={handleLogout}
+                className="group relative button-responsive touch-target bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 shadow-2xl shadow-red-500/50 hover:shadow-red-500/80 hover:scale-105 sm:hover:scale-110 overflow-hidden active:scale-95"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <LogOut size={18} />
+                  <span className="text-sm sm:text-base lg:text-lg">Sign Out</span>
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-red-400 to-rose-400 opacity-0 group-hover:opacity-30 transition-opacity"></div>
+              </button>
+              
+              <Link 
+                to="/dashboard" 
+                className="button-responsive touch-target bg-black/60 hover:bg-red-950/40 border-2 border-red-500/40 hover:border-red-500/70 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 backdrop-blur-md hover:scale-105 sm:hover:scale-110 shadow-lg shadow-red-900/30 hover:shadow-red-500/40 active:scale-95 text-sm sm:text-base lg:text-lg"
+              >
+                Dashboard
+              </Link>
+            </div>
+          ) : (
+            // Non-Authenticated User - Show Sign In and Try It Now
+            <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8 sm:mb-12 lg:mb-16 px-4">
+              <Link 
+                to="/preview" 
+                className="group relative button-responsive touch-target bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 shadow-2xl shadow-red-500/50 hover:shadow-red-500/80 hover:scale-105 sm:hover:scale-110 overflow-hidden active:scale-95"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <Rocket size={18} className="group-hover:rotate-12 transition-transform" />
+                  <span className="text-sm sm:text-base lg:text-lg">Try It Now - Free!</span>
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-red-400 to-rose-400 opacity-0 group-hover:opacity-30 transition-opacity"></div>
+              </Link>
+              
+              <Link 
+                to="/login" 
+                className="button-responsive touch-target bg-black/60 hover:bg-red-950/40 border-2 border-red-500/40 hover:border-red-500/70 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 backdrop-blur-md hover:scale-105 sm:hover:scale-110 shadow-lg shadow-red-900/30 hover:shadow-red-500/40 active:scale-95 text-sm sm:text-base lg:text-lg"
+              >
+                Sign In
+              </Link>
+              
+              <Link 
+                to="/gallery" 
+                className="button-responsive touch-target bg-black/60 hover:bg-gray-900/60 border-2 border-gray-700/50 hover:border-red-500/30 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 backdrop-blur-md hover:scale-105 sm:hover:scale-110 active:scale-95 text-sm sm:text-base lg:text-lg"
+              >
+                Explore Gallery
+              </Link>
+            </div>
+          )}
 
           {/* Stats with glow effect */}
           <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-8 max-w-3xl mx-auto px-2 sm:px-4">
@@ -183,7 +243,7 @@ export default function LandingPage() {
             {physicists.map((physicist, index) => (
               <Link
                 key={index}
-                to={`/physicist/${physicist.name.toLowerCase().replace(/\s+/g, '-')}`}
+                to={`/physicist/${createSlug(physicist.name)}`}
                 className="mobile-carousel-item w-80 flex-shrink-0 group block"
               >
                 <div className="relative h-full bg-gradient-to-br from-red-950/60 via-black/80 to-red-900/50 backdrop-blur-xl border-2 border-red-500/30 rounded-2xl overflow-hidden shadow-2xl shadow-red-900/50 transition-all duration-500 hover:scale-105 hover:border-red-500/60 hover:shadow-red-500/40 cursor-pointer">
@@ -223,7 +283,7 @@ export default function LandingPage() {
             {[...physicists, ...physicists].map((physicist, index) => (
               <Link
                 key={index}
-                to={`/physicist/${physicist.name.toLowerCase().replace(/\s+/g, '-')}`}
+                to={`/physicist/${createSlug(physicist.name)}`}
                 className="flex-shrink-0 w-80 lg:w-96 mx-2 lg:mx-4 group block"
                 onMouseEnter={() => setIsHovering(index)}
                 onMouseLeave={() => setIsHovering(null)}

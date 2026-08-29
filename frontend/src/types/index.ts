@@ -12,6 +12,10 @@ export interface User {
   avatar?: string;
   lastLogin?: Date;
   createdAt?: Date;
+  oauthProvider?: 'google' | 'github' | 'discord' | 'local';
+  onboardingCompleted?: boolean;
+  level?: number;
+  xp?: number;
 }
 
 export interface Simulation {

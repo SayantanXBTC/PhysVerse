@@ -15,7 +15,8 @@ import gamificationRoutes from './routes/gamification';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
+const IS_PROD = process.env.NODE_ENV === 'production';
 
 // Security middleware
 app.use(helmet({
@@ -24,32 +25,31 @@ app.use(helmet({
 app.use(compression()); // Add compression for better performance
 app.use(performanceMiddleware); // Add performance monitoring
 
-// CORS configuration - Allow Netlify frontend
+// CORS configuration
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://physsversee.netlify.app',
-  process.env.FRONTEND_URL
-].filter(Boolean); // Remove undefined values
+  process.env.FRONTEND_URL,
+  ...(process.env.ALLOWED_ORIGINS?.split(',').map(s => s.trim()) || [])
+].filter(Boolean) as string[];
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, Postman, curl, etc.)
-    if (!origin) {
-      return callback(null, true);
-    }
-    
-    // Check if origin is in allowed list
-    const isAllowed = allowedOrigins.some(allowed => 
-      origin === allowed || origin.startsWith(allowed as string)
+    if (!origin) return callback(null, true);
+
+    const isAllowed = allowedOrigins.some(allowed =>
+      origin === allowed || origin.startsWith(allowed)
     );
-    
+
     if (isAllowed) {
       callback(null, true);
     } else {
       logger.warn(`CORS blocked origin: ${origin}`);
-      logger.info(`Allowed origins: ${allowedOrigins.join(', ')}`);
-      callback(null, true); // Temporarily allow all for debugging
+      if (IS_PROD) {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      } else {
+        callback(null, true);
+      }
     }
   },
   credentials: true,

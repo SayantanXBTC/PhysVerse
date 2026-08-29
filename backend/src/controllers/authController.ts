@@ -1,9 +1,15 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
 import { User } from '../models/User';
+import { Simulation } from '../models/Simulation';
 import { generateToken } from '../utils/jwt';
 import { AuthRequest } from '../types';
+
+const googleClient = process.env.GOOGLE_CLIENT_ID
+  ? new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+  : null;
 import { 
   sendVerificationEmail, 
   sendPasswordResetEmail, 
@@ -112,7 +118,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const user = await User.findById(req.userId).select('-passwordHash');
-    
+
     if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
@@ -122,12 +128,96 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
       user: {
         id: user._id,
         name: user.name,
-        email: user.email
+        email: user.email,
+        avatar: user.avatar,
+        isEmailVerified: user.isEmailVerified,
+        oauthProvider: user.oauthProvider,
+        onboardingCompleted: user.onboardingCompleted,
+        level: user.level,
+        xp: user.xp
       }
     });
   } catch (error) {
     console.error('GetMe error:', error);
     res.status(500).json({ error: 'Failed to fetch user' });
+  }
+};
+
+// Google OAuth login/signup (verifies ID token from client Google Sign-In)
+export const googleAuth = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!googleClient || !process.env.GOOGLE_CLIENT_ID) {
+      res.status(503).json({ error: 'Google authentication not configured' });
+      return;
+    }
+
+    const { credential } = req.body;
+    if (!credential) {
+      res.status(400).json({ error: 'Missing Google credential' });
+      return;
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email || !payload.sub) {
+      res.status(401).json({ error: 'Invalid Google credential' });
+      return;
+    }
+
+    const { email, sub: googleId, name, picture, email_verified } = payload;
+
+    let user = await User.findOne({
+      $or: [
+        { oauthProvider: 'google', oauthId: googleId },
+        { email: email.toLowerCase() }
+      ]
+    });
+
+    if (user) {
+      // Link Google to existing account if not linked
+      if (user.oauthProvider !== 'google') {
+        user.oauthProvider = 'google';
+        user.oauthId = googleId;
+      }
+      if (email_verified && !user.isEmailVerified) user.isEmailVerified = true;
+      if (picture && !user.avatar) user.avatar = picture;
+      user.lastLogin = new Date();
+      user.loginCount = (user.loginCount || 0) + 1;
+      await user.save();
+    } else {
+      user = await User.create({
+        name: name || email.split('@')[0],
+        email: email.toLowerCase(),
+        oauthProvider: 'google',
+        oauthId: googleId,
+        isEmailVerified: !!email_verified,
+        avatar: picture,
+        lastLogin: new Date(),
+        loginCount: 1
+      });
+    }
+
+    const token = generateToken(user._id.toString());
+
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        isEmailVerified: user.isEmailVerified,
+        oauthProvider: user.oauthProvider,
+        onboardingCompleted: user.onboardingCompleted
+      }
+    });
+  } catch (error) {
+    console.error('Google auth error:', error);
+    res.status(401).json({ error: 'Google authentication failed' });
   }
 };
 
@@ -260,10 +350,10 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
 // Update Profile
 export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { name, avatar } = req.body;
-    
+    const { name, avatar, bio, favoriteTopics, theme, customTheme, onboardingCompleted } = req.body;
+
     const user = await User.findById(req.userId);
-    
+
     if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
@@ -277,9 +367,17 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
       user.name = name;
     }
 
-    if (avatar !== undefined) {
-      user.avatar = avatar;
+    if (avatar !== undefined) user.avatar = avatar;
+    if (bio !== undefined) user.bio = bio;
+    if (Array.isArray(favoriteTopics)) user.favoriteTopics = favoriteTopics;
+    if (theme && ['dark', 'light', 'auto'].includes(theme)) user.theme = theme;
+    if (customTheme && typeof customTheme === 'object') {
+      user.customTheme = {
+        primary: customTheme.primary || user.customTheme?.primary || '#ef4444',
+        secondary: customTheme.secondary || user.customTheme?.secondary || '#f43f5e'
+      };
     }
+    if (typeof onboardingCompleted === 'boolean') user.onboardingCompleted = onboardingCompleted;
 
     await user.save();
 
@@ -385,12 +483,22 @@ export const getUserStats = async (req: AuthRequest, res: Response): Promise<voi
       return;
     }
 
-    // TODO: Add actual simulation stats from database
+    const [simulationsCreated, publicSims] = await Promise.all([
+      Simulation.countDocuments({ userId: user._id }),
+      Simulation.find({ userId: user._id, isPublic: true })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select('_id name type createdAt')
+    ]);
+
     const stats = {
-      simulationsCreated: 0,
-      totalSimulationTime: 0,
-      favoriteSimulations: [],
-      accountAge: Math.floor((Date.now() - user.createdAt.getTime()) / (1000 * 60 * 60 * 24))
+      simulationsCreated,
+      totalSimulationTime: user.totalSimulationTime || 0,
+      favoriteSimulations: publicSims,
+      accountAge: Math.floor((Date.now() - user.createdAt.getTime()) / (1000 * 60 * 60 * 24)),
+      level: user.level,
+      xp: user.xp,
+      loginCount: user.loginCount
     };
 
     res.json({

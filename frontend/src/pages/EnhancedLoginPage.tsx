@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { authService } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
 import { Eye, EyeOff, Rocket, Sparkles, Zap, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
+import SocialAuthButtons from '@/components/SocialAuthButtons';
+import AuthDivider from '@/components/AuthDivider';
 
 export default function EnhancedLoginPage() {
   const [email, setEmail] = useState('');
@@ -14,17 +16,32 @@ export default function EnhancedLoginPage() {
   const navigate = useNavigate();
   const { setUser } = useAuthStore();
 
+  const [slowBackend, setSlowBackend] = useState(false);
+
   const loginMutation = useMutation({
-    mutationFn: () => authService.login(email, password),
+    mutationFn: () => authService.login(email, password, rememberMe),
     onSuccess: (data) => {
       setUser(data.user);
       toast.success(`Welcome back, ${data.user.name}!`);
-      navigate('/dashboard', { replace: true }); // Replace history for better back button behavior
+      navigate('/dashboard', { replace: true });
     },
     onError: (err: any) => {
-      toast.error((err as any)?.response?.data?.error || 'Login failed');
+      const status = err?.response?.status;
+      const msg = err?.response?.data?.error
+        || (err?.code === 'ECONNABORTED' ? 'Server took too long to respond. Try again.' : null)
+        || (!status ? 'Cannot reach server. Check your connection.' : 'Login failed');
+      toast.error(msg);
     }
   });
+
+  useEffect(() => {
+    if (!loginMutation.isPending) {
+      setSlowBackend(false);
+      return;
+    }
+    const t = setTimeout(() => setSlowBackend(true), 3000);
+    return () => clearTimeout(t);
+  }, [loginMutation.isPending]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +89,8 @@ export default function EnhancedLoginPage() {
 
         {/* Login Card */}
         <div className="glass-red p-8 rounded-3xl border-2 border-red-500/30 shadow-2xl shadow-red-900/50 animate-scaleIn">
+          <SocialAuthButtons mode="login" />
+          <AuthDivider />
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
             <div className="space-y-2">
@@ -159,6 +178,11 @@ export default function EnhancedLoginPage() {
                 </>
               )}
             </button>
+            {slowBackend && (
+              <p className="text-xs text-center text-yellow-400/90 -mt-2 animate-pulse">
+                Still working… server may be waking up.
+              </p>
+            )}
           </form>
 
           {/* Sign Up Link */}

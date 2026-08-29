@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, ChevronLeft, Sparkles, Target, Palette, Check } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
+import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 const topics = [
@@ -40,14 +41,33 @@ export default function OnboardingPage() {
     );
   };
 
-  const handleComplete = () => {
-    // TODO: Save preferences to backend
-    toast.success('Welcome to PhysVerse! 🎉');
-    navigate('/dashboard', { replace: true }); // Replace history so back button works correctly
+  const [saving, setSaving] = useState(false);
+
+  const persistPreferences = async (opts?: { silent?: boolean }) => {
+    const theme = themes.find(t => t.id === selectedTheme);
+    try {
+      setSaving(true);
+      await api.put('/auth/profile', {
+        favoriteTopics: selectedTopics,
+        customTheme: theme ? { primary: theme.primary, secondary: theme.secondary } : undefined,
+        onboardingCompleted: true
+      });
+    } catch (err) {
+      if (!opts?.silent) toast.error('Could not save preferences (continuing anyway)');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleSkip = () => {
-    navigate('/dashboard', { replace: true }); // Replace history so back button works correctly
+  const handleComplete = async () => {
+    await persistPreferences();
+    toast.success('Welcome to PhysVerse! 🎉');
+    navigate('/dashboard', { replace: true });
+  };
+
+  const handleSkip = async () => {
+    await persistPreferences({ silent: true });
+    navigate('/dashboard', { replace: true });
   };
 
   const renderStep = () => {
@@ -306,10 +326,11 @@ export default function OnboardingPage() {
             <button
               type="button"
               onClick={handleComplete}
-              className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 rounded-xl font-bold text-lg transition-all shadow-lg shadow-green-500/50 hover:scale-105 flex items-center gap-2"
+              disabled={saving}
+              className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 rounded-xl font-bold text-lg transition-all shadow-lg shadow-green-500/50 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
             >
               <Check size={20} />
-              Get Started
+              {saving ? 'Saving...' : 'Get Started'}
             </button>
           )}
         </div>

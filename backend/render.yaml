@@ -7,7 +7,9 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000
+      # PORT injected by Render; do not hardcode
+      # MONGODB_URI, JWT_SECRET, FRONTEND_URL, ALLOWED_ORIGINS,
+      # GOOGLE_CLIENT_ID, EMAIL_PROVIDER, RESEND_API_KEY
+      # must be set as secrets in the Render dashboard.
     healthCheckPath: /api/health
-    autoDeploy: false
+    autoDeploy: true

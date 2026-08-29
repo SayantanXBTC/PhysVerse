@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { 
-  register, 
-  login, 
+import {
+  register,
+  login,
   getMe,
+  googleAuth,
   verifyEmail,
   resendVerification,
   forgotPassword,
@@ -21,6 +22,7 @@ const router = Router();
 // Public routes
 router.post('/register', validate(registerSchema), register);
 router.post('/login', validate(loginSchema), login);
+router.post('/google', googleAuth);
 router.post('/verify-email', verifyEmail);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);

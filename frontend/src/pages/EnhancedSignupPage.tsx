@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { authService } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
 import { Eye, EyeOff, Rocket, Sparkles, Check, X, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
+import SocialAuthButtons from '@/components/SocialAuthButtons';
+import AuthDivider from '@/components/AuthDivider';
 
 export default function EnhancedSignupPage() {
   const [name, setName] = useState('');
@@ -26,22 +28,46 @@ export default function EnhancedSignupPage() {
   const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500'];
   const strengthLabels = ['Weak', 'Fair', 'Good', 'Strong'];
 
+  const [slowBackend, setSlowBackend] = useState(false);
+
   const signupMutation = useMutation({
     mutationFn: () => authService.register(name, email, password),
     onSuccess: (data) => {
       setUser(data.user);
       toast.success('Welcome to PhysVerse! 🎉');
-      navigate('/onboarding', { replace: true }); // Replace history for better back button behavior
+      navigate('/onboarding', { replace: true });
     },
     onError: (err: any) => {
-      toast.error(err?.response?.data?.error || 'Registration failed');
+      const status = err?.response?.status;
+      const msg = err?.response?.data?.error
+        || (err?.code === 'ECONNABORTED' ? 'Server took too long to respond. Try again.' : null)
+        || (!status ? 'Cannot reach server. Check your connection.' : 'Registration failed');
+      toast.error(msg);
     }
   });
 
+  useEffect(() => {
+    if (!signupMutation.isPending) {
+      setSlowBackend(false);
+      return;
+    }
+    const t = setTimeout(() => setSlowBackend(true), 3000);
+    return () => clearTimeout(t);
+  }, [signupMutation.isPending]);
+
+  const validate = (): string | null => {
+    if (!name.trim() || name.trim().length < 2) return 'Please enter your name';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Enter a valid email';
+    if (password.length < 6) return 'Password must be at least 6 characters';
+    if (passwordStrength < 2) return 'Password too weak — add a number or uppercase letter';
+    return null;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordStrength < 2) {
-      toast.error('Please use a stronger password');
+    const err = validate();
+    if (err) {
+      toast.error(err);
       return;
     }
     signupMutation.mutate();
@@ -88,6 +114,8 @@ export default function EnhancedSignupPage() {
 
         {/* Signup Card */}
         <div className="glass-red p-8 rounded-3xl border-2 border-red-500/30 shadow-2xl shadow-red-900/50 animate-scaleIn">
+          <SocialAuthButtons mode="signup" />
+          <AuthDivider />
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Name */}
             <div className="space-y-2">
@@ -204,8 +232,8 @@ export default function EnhancedSignupPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={signupMutation.isPending || passwordStrength < 2}
-              className="w-full px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg shadow-red-500/50 hover:shadow-red-500/70 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              disabled={signupMutation.isPending}
+              className="w-full px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg shadow-red-500/50 hover:shadow-red-500/70 hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {signupMutation.isPending ? (
                 <>
@@ -219,6 +247,11 @@ export default function EnhancedSignupPage() {
                 </>
               )}
             </button>
+            {slowBackend && (
+              <p className="text-xs text-center text-yellow-400/90 -mt-2 animate-pulse">
+                Still working… server may be waking up.
+              </p>
+            )}
           </form>
 
           {/* Login Link */}

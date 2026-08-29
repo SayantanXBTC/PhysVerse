@@ -1,27 +1,51 @@
 import crypto from 'crypto';
 
-// Email configuration (using console.log for now, replace with actual email service)
+const FROM = process.env.EMAIL_FROM || 'PhysVerse <noreply@physverse.local>';
+const PROVIDER = (process.env.EMAIL_PROVIDER || '').toLowerCase();
+
+// Sends via configured provider. Falls back to console log in dev if none configured.
 export const sendEmail = async (to: string, subject: string, html: string): Promise<void> => {
-  // TODO: Replace with actual email service (SendGrid, AWS SES, etc.)
-  console.log('='.repeat(50));
-  console.log('📧 EMAIL SENT');
-  console.log('To:', to);
-  console.log('Subject:', subject);
-  console.log('Body:', html);
-  console.log('='.repeat(50));
-  
-  // For production, use a service like SendGrid:
-  /*
-  const sgMail = require('@sendgrid/mail');
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-  
-  await sgMail.send({
-    to,
-    from: process.env.FROM_EMAIL,
-    subject,
-    html
-  });
-  */
+  try {
+    if (PROVIDER === 'resend' && process.env.RESEND_API_KEY) {
+      const resp = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ from: FROM, to, subject, html })
+      });
+      if (!resp.ok) throw new Error(`Resend failed: ${resp.status} ${await resp.text()}`);
+      return;
+    }
+
+    if (PROVIDER === 'sendgrid' && process.env.SENDGRID_API_KEY) {
+      const resp = await fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          personalizations: [{ to: [{ email: to }] }],
+          from: { email: FROM.replace(/.*<|>/g, '') || FROM, name: 'PhysVerse' },
+          subject,
+          content: [{ type: 'text/html', value: html }]
+        })
+      });
+      if (!resp.ok) throw new Error(`SendGrid failed: ${resp.status} ${await resp.text()}`);
+      return;
+    }
+
+    // Dev fallback
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('📧 [DEV] Email skipped (no provider configured)');
+      console.log('  To:', to, '| Subject:', subject);
+    }
+  } catch (err) {
+    console.error('sendEmail error:', err);
+    // Don't throw — email failure should not break signup flow
+  }
 };
 
 export const generateVerificationToken = (): string => {

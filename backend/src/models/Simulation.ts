@@ -1,10 +1,10 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { SimulationParameters, SimulationType } from '../types';
+import { SimulationParameters } from '../types';
 
 export interface ISimulation extends Document {
   userId: mongoose.Types.ObjectId;
   name: string;
-  type: SimulationType;
+  type: string;
   parameters: SimulationParameters;
   isPublic: boolean;
   createdAt: Date;
@@ -28,7 +28,9 @@ const simulationSchema = new Schema<ISimulation>({
   type: {
     type: String,
     required: true,
-    enum: Object.values(SimulationType)
+    trim: true,
+    minlength: 1,
+    maxlength: 60
   },
   parameters: {
     type: Schema.Types.Mixed,

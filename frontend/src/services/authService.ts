@@ -45,8 +45,8 @@ export const authService = {
     return data;
   },
 
-  async updateProfile(name: string, avatar?: string): Promise<{ user: User }> {
-    const { data } = await api.put('/auth/profile', { name, avatar });
+  async updateProfile(name: string, avatar?: string, bio?: string): Promise<{ user: User }> {
+    const { data } = await api.put('/auth/profile', { name, avatar, bio });
     return data;
   },
 

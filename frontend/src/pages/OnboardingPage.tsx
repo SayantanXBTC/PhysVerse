@@ -83,7 +83,7 @@ export default function OnboardingPage() {
                 Welcome, {user?.name}!
               </h2>
               <p className="text-xl text-gray-300">
-                Let's personalize your PhysVerse experience
+                Pick topics you'd like to explore.
               </p>
             </div>
 
@@ -204,7 +204,7 @@ export default function OnboardingPage() {
                 You're All Set!
               </h2>
               <p className="text-xl text-gray-300">
-                Ready to explore the universe of physics
+                Ready when you are.
               </p>
             </div>
 

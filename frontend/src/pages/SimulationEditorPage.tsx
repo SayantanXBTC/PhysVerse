@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { simulationService } from '@/services/simulationService';
@@ -9,14 +9,30 @@ import PerformanceMonitor from '@/components/PerformanceMonitor';
 import SimulationDataChart from '@/components/SimulationDataChart';
 import { useSimulationData } from '@/hooks/useSimulationData';
 import { getSimulationDataConfig } from '@/utils/simulationDataConfig';
-import { Save, ArrowLeft, Play, Pause, RotateCcw, Globe, Lock, BarChart3 } from 'lucide-react';
+import {
+  Save,
+  ArrowLeft,
+  Play,
+  Pause,
+  RotateCcw,
+  Globe,
+  Lock,
+  BarChart3,
+  ChevronDown,
+  ChevronUp,
+  Check,
+  AlertCircle,
+  Activity
+} from 'lucide-react';
 import toast from 'react-hot-toast';
+
+type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
 export default function SimulationEditorPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const isNew = id === 'new';
+  const isNew = !id || id === 'new' || id === 'undefined';
 
   const [name, setName] = useState('New Simulation');
   const [simulationId, setSimulationId] = useState('projectile');
@@ -24,7 +40,9 @@ export default function SimulationEditorPage() {
   const [isPublic, setIsPublic] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [showChart, setShowChart] = useState(true);
-  const [chartKey, setChartKey] = useState(0); // Force re-render of chart
+  const [chartKey, setChartKey] = useState(0);
+  const [aboutOpen, setAboutOpen] = useState(true);
+  const [saveState, setSaveState] = useState<SaveState>('idle');
   const { data: chartData, addDataPoint, clearData } = useSimulationData(150);
 
   const simulation = simulationRegistry.create(simulationId);
@@ -41,10 +59,15 @@ export default function SimulationEditorPage() {
       setSimulationId(savedSimulation.type);
       setParameters(savedSimulation.parameters);
       setIsPublic(savedSimulation.isPublic);
+      // Auto-run saved sim after brief mount delay
+      const t = setTimeout(() => setIsRunning(true), 250);
+      return () => clearTimeout(t);
     }
   }, [savedSimulation]);
 
   useEffect(() => {
+    // Skip param reset when loading a saved sim — savedSimulation effect handles it
+    if (savedSimulation && savedSimulation.type === simulationId) return;
     const sim = simulationRegistry.create(simulationId);
     if (sim) {
       const defaultParams: Record<string, unknown> = {};
@@ -52,41 +75,49 @@ export default function SimulationEditorPage() {
         defaultParams[key] = param.default;
       });
       setParameters(defaultParams);
-      clearData(); // Clear chart data when switching simulations
-      setChartKey(prev => prev + 1); // Force chart re-render
+      clearData();
+      setChartKey((prev) => prev + 1);
     }
-  }, [simulationId, clearData]);
+  }, [simulationId, clearData, savedSimulation]);
 
   const saveMutation = useMutation({
     mutationFn: () => {
       if (isNew) {
         return simulationService.create(name, simulationId as string, parameters, isPublic);
-      } else {
-        return simulationService.update(id!, { name, parameters, isPublic });
       }
+      return simulationService.update(id!, { name, parameters, isPublic });
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['simulations'] });
-      toast.success('Simulation saved successfully');
-      if (isNew) {
+      setSaveState('saved');
+      toast.success('Simulation saved');
+      setTimeout(() => setSaveState('idle'), 2000);
+      if (isNew && data?._id) {
         navigate(`/simulation/${data._id}`);
       }
     },
     onError: (error: any) => {
       console.error('Save error:', error);
-      const errorMessage = error?.response?.data?.error || error?.message || 'Failed to save simulation';
-      toast.error(errorMessage);
+      const msg = error?.response?.data?.error || error?.message || 'Failed to save simulation';
+      setSaveState('error');
+      toast.error(msg);
+      setTimeout(() => setSaveState('idle'), 3000);
     }
   });
 
+  const handleSave = () => {
+    setSaveState('saving');
+    saveMutation.mutate();
+  };
+
   const handleParameterChange = (key: string, value: unknown) => {
-    setParameters(prev => ({ ...prev, [key]: value }));
+    setParameters((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleReset = () => {
     setIsRunning(false);
     clearData();
-    setChartKey(prev => prev + 1); // Force chart re-render
+    setChartKey((prev) => prev + 1);
     if (simulation) {
       const defaultParams: Record<string, unknown> = {};
       Object.entries(simulation.parameters).forEach(([key, param]) => {
@@ -96,180 +127,263 @@ export default function SimulationEditorPage() {
     }
   };
 
-  // Get simulation-specific data configuration
   const dataConfig = getSimulationDataConfig(simulationId);
 
-  // Collect simulation-specific data
   useEffect(() => {
     if (!isRunning) return;
-    
     const interval = setInterval(() => {
       const time = chartData.length * 0.1;
       const simulationData = dataConfig.generateData(time, parameters);
-      
-      addDataPoint({
-        time: parseFloat(time.toFixed(2)),
-        ...simulationData,
-      });
+      addDataPoint({ time: parseFloat(time.toFixed(2)), ...simulationData });
     }, 100);
-
     return () => clearInterval(interval);
   }, [isRunning, chartData.length, addDataPoint, simulationId, parameters, dataConfig]);
 
+  const simTime = useMemo(() => (chartData.length * 0.1).toFixed(2), [chartData.length]);
+
+  const status = isRunning ? 'RUNNING' : chartData.length > 0 ? 'PAUSED' : 'READY';
+  const statusColor =
+    status === 'RUNNING' ? 'text-emerald-400' : status === 'PAUSED' ? 'text-amber-400' : 'text-gray-400';
+  const statusDot =
+    status === 'RUNNING' ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)]' : status === 'PAUSED' ? 'bg-amber-400' : 'bg-gray-500';
+
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gray-900">
+      <div className="h-screen flex items-center justify-center bg-[#08080A]">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mb-4"></div>
-          <p className="text-gray-400">Loading simulation...</p>
+          <div className="inline-block animate-spin rounded-full h-10 w-10 border-2 border-red-500 border-t-transparent mb-3" />
+          <p className="text-gray-400 text-sm">Preparing simulation…</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900">
-      <div className="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50 px-6 py-4">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
+    <div className="h-screen flex flex-col bg-[#08080A] text-white">
+      <header className="relative z-10 border-b border-white/[0.06] bg-[#0c0c0f]/95 backdrop-blur-xl px-4 sm:px-6 py-3">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <button
               type="button"
               onClick={() => navigate('/dashboard')}
-              className="p-2 hover:bg-gray-700/50 rounded-lg transition-colors"
+              className="p-2 hover:bg-white/[0.05] rounded-md text-gray-400 hover:text-white transition-colors"
               aria-label="Back to dashboard"
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft size={16} />
             </button>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent max-w-md"
+              className="min-w-0 flex-1 max-w-md px-3 py-1.5 bg-transparent hover:bg-white/[0.04] focus:bg-white/[0.06] border border-transparent hover:border-white/10 focus:border-red-500/50 rounded-md text-sm font-medium focus:outline-none transition-colors"
               placeholder="Simulation name"
             />
             {simulation && (
-              <span className="px-3 py-1 bg-primary-500/10 text-primary-400 text-sm rounded-full border border-primary-500/20">
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-500/10 text-red-300 text-xs font-mono uppercase tracking-widest rounded border border-red-500/20">
                 {simulation.metadata.name}
               </span>
             )}
+            <span className={`hidden md:inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest ${statusColor}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${statusDot}`} />
+              {status}
+            </span>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
               type="button"
               onClick={() => {
                 setShowChart(!showChart);
-                setChartKey(prev => prev + 1); // Force chart re-render when toggling
+                setChartKey((prev) => prev + 1);
               }}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                showChart 
-                  ? 'bg-red-500/10 text-red-400 border border-red-500/20' 
-                  : 'bg-gray-700/50 text-gray-400 border border-gray-700'
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                showChart
+                  ? 'bg-red-500/10 text-red-300 border border-red-500/25'
+                  : 'bg-white/[0.03] text-gray-400 border border-white/10 hover:text-white hover:border-white/20'
               }`}
+              aria-pressed={showChart}
             >
-              <BarChart3 size={18} />
-              <span className="text-sm">{showChart ? 'Hide Chart' : 'Show Chart'}</span>
+              <BarChart3 size={13} />
+              <span className="hidden sm:inline">{showChart ? 'Chart' : 'Chart'}</span>
             </button>
             <button
               type="button"
               onClick={() => setIsPublic(!isPublic)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                isPublic 
-                  ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
-                  : 'bg-gray-700/50 text-gray-400 border border-gray-700'
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                isPublic
+                  ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/25'
+                  : 'bg-white/[0.03] text-gray-400 border border-white/10 hover:text-white hover:border-white/20'
               }`}
+              aria-pressed={isPublic}
             >
-              {isPublic ? <Globe size={18} /> : <Lock size={18} />}
-              <span className="text-sm">{isPublic ? 'Public' : 'Private'}</span>
+              {isPublic ? <Globe size={13} /> : <Lock size={13} />}
+              <span className="hidden sm:inline">{isPublic ? 'Public' : 'Private'}</span>
             </button>
             <button
               type="button"
-              onClick={() => saveMutation.mutate()}
-              disabled={saveMutation.isPending}
-              className="flex items-center space-x-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors disabled:opacity-50"
+              onClick={handleSave}
+              disabled={saveState === 'saving'}
+              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-semibold transition-all disabled:cursor-not-allowed ${
+                saveState === 'saved'
+                  ? 'bg-emerald-500 text-white'
+                  : saveState === 'error'
+                  ? 'bg-red-700 text-white'
+                  : 'bg-red-600 hover:bg-red-500 text-white shadow-md shadow-red-950/50'
+              }`}
             >
-              <Save size={18} />
-              <span>{saveMutation.isPending ? 'Saving...' : 'Save'}</span>
+              {saveState === 'saving' ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  Saving…
+                </>
+              ) : saveState === 'saved' ? (
+                <>
+                  <Check size={13} /> Saved
+                </>
+              ) : saveState === 'error' ? (
+                <>
+                  <AlertCircle size={13} /> Retry
+                </>
+              ) : (
+                <>
+                  <Save size={13} /> Save
+                </>
+              )}
             </button>
           </div>
         </div>
-      </div>
+      </header>
 
       <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 relative flex flex-col overflow-hidden">
-          <div className={showChart ? 'flex-1 overflow-hidden' : 'h-full overflow-hidden'}>
-            <SimulationCanvas
-              simulationId={simulationId}
-              parameters={parameters}
-              isRunning={isRunning}
-            />
-          </div>
-          
-          {showChart && (
-            <div className="h-96 flex-shrink-0 p-4 bg-gray-900/50 border-t border-gray-700/50">
-              <SimulationDataChart
-                key={chartKey}
-                data={chartData}
-                dataKeys={dataConfig.dataKeys.map(dk => ({
-                  key: dk.key,
-                  color: dk.color,
-                  label: `${dk.label} (${dk.unit})`,
-                }))}
-                title={dataConfig.title}
-                maxPoints={150}
-              />
+        <div className="flex-1 relative flex flex-col overflow-hidden bg-[#050507]">
+          <div className={`relative ${showChart ? 'flex-1' : 'h-full'} overflow-hidden transition-all duration-300`}>
+            <SimulationCanvas simulationId={simulationId} parameters={parameters} isRunning={isRunning} />
+
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute top-3 left-3 flex items-center gap-2 px-2.5 py-1.5 bg-black/70 backdrop-blur-md border border-white/10 rounded-md">
+                <span className={`w-1.5 h-1.5 rounded-full ${statusDot} animate-pulse`} />
+                <span className={`text-[10px] font-mono uppercase tracking-widest ${statusColor}`}>{status}</span>
+                {simulation && (
+                  <>
+                    <span className="w-px h-3 bg-white/15" />
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-gray-300">
+                      {simulation.metadata.name}
+                    </span>
+                  </>
+                )}
+              </div>
+
+              <div className="absolute top-3 right-3 flex items-center gap-3 px-2.5 py-1.5 bg-black/70 backdrop-blur-md border border-white/10 rounded-md">
+                <div className="text-right">
+                  <div className="text-[9px] font-mono uppercase tracking-widest text-gray-500 leading-none">t</div>
+                  <div className="text-xs font-mono tabular-nums text-red-300 leading-tight mt-0.5">{simTime}s</div>
+                </div>
+                <span className="w-px h-6 bg-white/15" />
+                <div className="text-right">
+                  <div className="text-[9px] font-mono uppercase tracking-widest text-gray-500 leading-none">pts</div>
+                  <div className="text-xs font-mono tabular-nums text-gray-200 leading-tight mt-0.5">{chartData.length}</div>
+                </div>
+              </div>
+
+              <div className="absolute bottom-3 left-3 px-2.5 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded text-[10px] font-mono uppercase tracking-widest text-gray-500">
+                drag · orbit · scroll · zoom
+              </div>
             </div>
-          )}
+          </div>
+
+          <div
+            className={`overflow-hidden transition-all duration-300 ease-out flex-shrink-0 border-t border-white/[0.06] bg-[#0a0a0c] ${
+              showChart ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+            }`}
+          >
+            <div className="h-96 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Activity size={13} className="text-red-400" />
+                  <span className="text-xs font-mono uppercase tracking-widest text-gray-400">Live Data</span>
+                </div>
+                <span className="font-mono text-[10px] text-gray-500 tabular-nums">
+                  {chartData.length}/150 samples
+                </span>
+              </div>
+              <div className="h-[calc(100%-24px)]">
+                <SimulationDataChart
+                  key={chartKey}
+                  data={chartData}
+                  dataKeys={dataConfig.dataKeys.map((dk) => ({
+                    key: dk.key,
+                    color: dk.color,
+                    label: `${dk.label} (${dk.unit})`
+                  }))}
+                  title={dataConfig.title}
+                  maxPoints={150}
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="w-96 bg-gray-800/30 backdrop-blur-md border-l border-gray-700/50 overflow-y-auto">
-          <div className="p-6 space-y-6">
-            <div className="flex items-center space-x-2">
-              <button
-                type="button"
-                onClick={() => setIsRunning(!isRunning)}
-                className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-lg transition-all ${
-                  isRunning
-                    ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 hover:bg-yellow-500/20'
-                    : 'bg-primary-600 hover:bg-primary-700 text-white'
-                }`}
-              >
-                {isRunning ? <Pause size={20} /> : <Play size={20} />}
-                <span className="font-medium">{isRunning ? 'Pause' : 'Play'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="p-3 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors"
-                aria-label="Reset simulation"
-              >
-                <RotateCcw size={20} />
-              </button>
+        <aside className="w-96 shrink-0 bg-[#0a0a0c] border-l border-white/[0.06] overflow-y-auto">
+          <div className="p-5 space-y-5">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500">Playback</p>
+                <span className={`text-[10px] font-mono uppercase tracking-widest ${statusColor}`}>{status}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsRunning(!isRunning)}
+                  className={`flex-1 flex items-center justify-center gap-2 h-11 rounded-lg font-semibold text-sm transition-all ${
+                    isRunning
+                      ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-amber-500/25'
+                      : 'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-950/50'
+                  }`}
+                >
+                  {isRunning ? <Pause size={16} /> : <Play size={16} />}
+                  <span>{isRunning ? 'Pause' : 'Run'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="h-11 w-11 flex items-center justify-center bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                  aria-label="Reset simulation"
+                  title="Reset"
+                >
+                  <RotateCcw size={15} />
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-200">
+            <div>
+              <label htmlFor="sim-type" className="block text-[10px] font-mono uppercase tracking-widest text-gray-500 mb-2">
                 Simulation Type
               </label>
               <select
+                id="sim-type"
                 value={simulationId}
                 onChange={(e) => {
                   setSimulationId(e.target.value);
                   setIsRunning(false);
                 }}
                 aria-label="Simulation Type"
-                className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full h-10 px-3 bg-black/40 border border-white/10 focus:border-red-500/60 rounded-md text-sm focus:outline-none transition-colors appearance-none cursor-pointer"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 12px center'
+                }}
               >
-                <optgroup label="Free Simulations">
+                <optgroup label="Free">
                   {simulationRegistry.getFreeMetadata().map((meta) => (
-                    <option key={meta.id} value={meta.id}>
+                    <option key={meta.id} value={meta.id} className="bg-[#0a0a0c]">
                       {meta.name}
                     </option>
                   ))}
                 </optgroup>
-                <optgroup label="Premium Simulations ⭐">
+                <optgroup label="Premium ⭐">
                   {simulationRegistry.getPremiumMetadata().map((meta) => (
-                    <option key={meta.id} value={meta.id}>
+                    <option key={meta.id} value={meta.id} className="bg-[#0a0a0c]">
                       {meta.name}
                     </option>
                   ))}
@@ -278,30 +392,47 @@ export default function SimulationEditorPage() {
             </div>
 
             {simulation && simulation.metadata && (
-              <div className="p-4 bg-gray-800/30 rounded-lg border border-gray-700/50">
-                <h3 className="text-sm font-semibold text-gray-200 mb-2">
-                  About This Simulation
-                </h3>
-                <p className="text-sm text-gray-400 mb-3">
-                  {simulation.metadata.description}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {simulation.metadata.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2 py-1 bg-gray-700/50 text-gray-300 text-xs rounded"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+              <div className="border border-white/[0.06] rounded-lg overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setAboutOpen(!aboutOpen)}
+                  className="w-full flex items-center justify-between px-4 py-2.5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+                  aria-expanded={aboutOpen}
+                >
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-gray-400">About</span>
+                  {aboutOpen ? <ChevronUp size={13} className="text-gray-500" /> : <ChevronDown size={13} className="text-gray-500" />}
+                </button>
+                {aboutOpen && (
+                  <div className="p-4 space-y-3 border-t border-white/[0.04]">
+                    <p className="text-xs text-gray-300 leading-relaxed [text-wrap:pretty]">
+                      {simulation.metadata.description}
+                    </p>
+                    {simulation.metadata.tags?.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {simulation.metadata.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="px-2 py-0.5 bg-white/[0.03] border border-white/[0.08] text-gray-400 text-[10px] font-mono rounded"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-200 mb-4">
-                Parameters
-              </h3>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500">Parameters</p>
+                {isRunning && (
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-amber-400">
+                    Paused while running
+                  </span>
+                )}
+              </div>
               {simulation && (
                 <DynamicParameterControls
                   parameters={simulation.parameters}
@@ -312,7 +443,7 @@ export default function SimulationEditorPage() {
               )}
             </div>
           </div>
-        </div>
+        </aside>
       </div>
 
       <PerformanceMonitor />

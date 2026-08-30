@@ -1,81 +1,115 @@
-import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { LogOut, Home, LayoutDashboard, Globe, Trophy, BookOpen, Award } from 'lucide-react';
+
+const NAV = [
+  { to: '/', label: 'Home', icon: Home },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/gallery', label: 'Gallery', icon: Globe },
+  { to: '/challenges', label: 'Challenges', icon: Trophy },
+  { to: '/formulas', label: 'Formulas', icon: BookOpen },
+  { to: '/leaderboard', label: 'Leaderboard', icon: Award }
+];
 
 export default function Layout() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
+  const initials = (user?.name || 'U')
+    .split(' ')
+    .map((s) => s[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
   return (
     <div className="min-h-screen bg-black">
-      {/* Red glow background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
-      <nav className="relative bg-black/80 border-b-2 border-red-500/30 backdrop-blur-xl shadow-lg shadow-red-900/20">
+      <nav className="relative bg-black/70 border-b border-red-500/20 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center space-x-8">
-              <Link to="/" className="flex items-center space-x-2 group">
-                <div className="w-8 h-8 bg-gradient-to-br from-red-600 to-red-800 rounded-lg shadow-lg shadow-red-500/50 group-hover:scale-110 transition-transform" />
-                <span className="text-2xl font-black bg-gradient-to-r from-red-400 to-rose-500 bg-clip-text text-transparent">PhysVerse</span>
+          <div className="flex items-center justify-between h-14 gap-4">
+            <div className="flex items-center gap-6 min-w-0">
+              <Link to="/" className="flex items-center gap-2 group shrink-0">
+                <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-red-500/30 to-red-900/60 border border-red-400/40 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_4px_12px_rgba(229,72,77,0.35)] group-hover:scale-105 transition-transform overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+                  <svg viewBox="0 0 32 32" className="relative w-full h-full" aria-hidden="true">
+                    <g fill="none" stroke="currentColor" strokeWidth="1.4" className="text-red-200">
+                      <ellipse cx="16" cy="16" rx="10" ry="4" />
+                      <ellipse cx="16" cy="16" rx="10" ry="4" transform="rotate(60 16 16)" />
+                      <ellipse cx="16" cy="16" rx="10" ry="4" transform="rotate(-60 16 16)" />
+                    </g>
+                    <circle cx="16" cy="16" r="2" className="fill-red-300" />
+                  </svg>
+                </div>
+                <span className="text-lg font-black bg-gradient-to-r from-red-400 to-rose-500 bg-clip-text text-transparent tracking-tight">
+                  PhysVerse
+                </span>
               </Link>
-              
-              <div className="flex space-x-2">
-                <Link to="/" className="flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-red-950/40 border border-transparent hover:border-red-500/30 transition-all duration-300 hover:scale-105 text-gray-300 hover:text-white">
-                  <Home size={18} />
-                  <span className="font-semibold">Home</span>
-                </Link>
-                <Link to="/dashboard" className="flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-red-950/40 border border-transparent hover:border-red-500/30 transition-all duration-300 hover:scale-105 text-gray-300 hover:text-white">
-                  <LayoutDashboard size={18} />
-                  <span className="font-semibold">Dashboard</span>
-                </Link>
-                <Link to="/gallery" className="flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-red-950/40 border border-transparent hover:border-red-500/30 transition-all duration-300 hover:scale-105 text-gray-300 hover:text-white">
-                  <Globe size={18} />
-                  <span className="font-semibold">Gallery</span>
-                </Link>
-                <Link to="/challenges" className="flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-red-950/40 border border-transparent hover:border-red-500/30 transition-all duration-300 hover:scale-105 text-gray-300 hover:text-white">
-                  <Trophy size={18} />
-                  <span className="font-semibold">Challenges</span>
-                </Link>
-                <Link to="/formulas" className="flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-red-950/40 border border-transparent hover:border-red-500/30 transition-all duration-300 hover:scale-105 text-gray-300 hover:text-white">
-                  <BookOpen size={18} />
-                  <span className="font-semibold">Formulas</span>
-                </Link>
-                <Link to="/leaderboard" className="flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-red-950/40 border border-transparent hover:border-red-500/30 transition-all duration-300 hover:scale-105 text-gray-300 hover:text-white">
-                  <Award size={18} />
-                  <span className="font-semibold">Leaderboard</span>
-                </Link>
+
+              <div className="hidden md:flex items-center gap-1">
+                {NAV.map((item) => {
+                  const active = item.to === '/' ? pathname === '/' : pathname.startsWith(item.to);
+                  return (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                        active
+                          ? 'text-white bg-red-500/10'
+                          : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
+                      }`}
+                    >
+                      <item.icon size={15} />
+                      <span>{item.label}</span>
+                      {active && (
+                        <span className="absolute -bottom-[13px] left-2 right-2 h-[2px] bg-gradient-to-r from-red-500 to-rose-400 rounded-full" />
+                      )}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
-              {user && (
-                <>
-                  <Link 
-                    to="/profile"
-                    className="text-gray-300 hover:text-red-400 font-semibold transition-colors"
-                  >
-                    Welcome, <span className="text-red-400">{user.name}</span>
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-red-950/40 hover:bg-red-900/60 border-2 border-red-500/30 hover:border-red-500/60 transition-all duration-300 hover:scale-105 font-semibold"
-                  >
-                    <LogOut size={18} />
-                    <span>Logout</span>
-                  </button>
-                </>
-              )}
-            </div>
+            {user && (
+              <div className="flex items-center gap-2 shrink-0">
+                <Link
+                  to="/profile"
+                  className="hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-md hover:bg-white/[0.04] transition-colors group max-w-[220px]"
+                  aria-label="Open profile"
+                >
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-red-600 to-rose-700 flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-md shadow-red-950/50">
+                    {user.avatar ? (
+                      <img src={user.avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      initials
+                    )}
+                  </div>
+                  <span className="text-sm text-gray-300 group-hover:text-white transition-colors truncate">
+                    {user.name}
+                  </span>
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/[0.03] hover:bg-red-500/10 border border-white/10 hover:border-red-500/40 text-gray-300 hover:text-white text-sm font-medium transition-colors"
+                  aria-label="Logout"
+                >
+                  <LogOut size={14} />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </nav>

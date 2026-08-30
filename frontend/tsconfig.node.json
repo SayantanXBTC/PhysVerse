@@ -12,15 +12,8 @@
     "lib": ["ES2022"],
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "allowJs": true,
-    "checkJs": false,
-    "noEmit": true
+    "outDir": "./.tsbuild-node"
   },
-  "include": [
-    "vite.config.ts",
-    "vitest.config.ts",
-    "postcss.config.js",
-    "tailwind.config.js"
-  ],
+  "include": ["vite.config.ts", "vitest.config.ts"],
   "exclude": ["src/**/*", "node_modules"]
 }

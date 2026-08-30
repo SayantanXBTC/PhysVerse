@@ -89,7 +89,7 @@ export default function SimulationPreviewPage() {
               <ArrowLeft size={20} />
             </Link>
             <div className="flex items-center space-x-2">
-              <Sparkles className="text-red-400 animate-pulse" size={20} sm:size={24} />
+              <Sparkles className="text-red-400 animate-pulse w-5 h-5 sm:w-6 sm:h-6" />
               <h1 className="text-lg sm:text-2xl font-black bg-gradient-to-r from-red-400 to-rose-500 bg-clip-text text-transparent">
                 Try PhysVerse
               </h1>
@@ -100,7 +100,7 @@ export default function SimulationPreviewPage() {
             to="/signup"
             className="px-3 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 rounded-xl text-sm sm:text-base font-bold transition-all duration-300 shadow-lg shadow-red-500/40 hover:shadow-red-500/60 hover:scale-105"
           >
-            Sign Up to Save
+            Save experiment
           </Link>
         </div>
       </div>
@@ -194,7 +194,7 @@ export default function SimulationPreviewPage() {
                 ))}
               </select>
               <p className="text-xs text-red-400 mt-2 font-semibold">
-                ⭐ 15 more premium simulations available when you sign up!
+                15 more simulations available after sign up.
               </p>
             </div>
 

@@ -1,9 +1,8 @@
 import { z } from 'zod';
-import { SimulationType } from '../types';
 
 export const createSimulationSchema = z.object({
   name: z.string().min(1).max(100),
-  type: z.enum([SimulationType.PROJECTILE, SimulationType.SPRING_MASS, SimulationType.TWO_BODY_ORBIT]),
+  type: z.string().min(1).max(60),
   parameters: z.record(z.any()),
   isPublic: z.boolean().optional().default(false)
 });

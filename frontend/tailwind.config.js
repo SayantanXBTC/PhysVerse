@@ -6,19 +6,39 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans:    ['"Geist Variable"', 'Geist', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Fraunces Variable"', 'Fraunces', 'ui-serif', 'Georgia', 'serif'],
+        mono:    ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
+      },
       colors: {
+        // Slightly desaturated primary (was pure #ef4444). Same wavelength, less scream.
         primary: {
-          50: '#fef2f2',
-          100: '#fee2e2',
-          200: '#fecaca',
-          300: '#fca5a5',
-          400: '#f87171',
-          500: '#ef4444',
-          600: '#dc2626',
-          700: '#b91c1c',
-          800: '#991b1b',
-          900: '#7f1d1d',
-          950: '#450a0a',
+          50:  '#FDECEC',
+          100: '#F9D3D4',
+          200: '#F3A9AB',
+          300: '#EE8083',
+          400: '#EA6165',
+          500: '#E5484D',
+          600: '#C42B30',
+          700: '#9C2226',
+          800: '#7A1B1E',
+          900: '#5A1416',
+          950: '#2B0F11'
+        },
+        // Override built-in red with the same, so existing text-red-*/bg-red-* also cool down uniformly.
+        red: {
+          50:  '#FDECEC',
+          100: '#F9D3D4',
+          200: '#F3A9AB',
+          300: '#EE8083',
+          400: '#EA6165',
+          500: '#E5484D',
+          600: '#C42B30',
+          700: '#9C2226',
+          800: '#7A1B1E',
+          900: '#5A1416',
+          950: '#2B0F11'
         }
       },
       animation: {

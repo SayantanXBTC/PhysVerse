@@ -11,11 +11,10 @@ export default function LeaderboardPage() {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['leaderboard'],
     queryFn: gamificationService.getLeaderboard,
-    refetchInterval: 10000, // Refetch every 10 seconds for real-time updates
-    refetchIntervalInBackground: true,
+    refetchInterval: 15000,
+    refetchIntervalInBackground: true
   });
 
-  // Update last update time when data changes
   useEffect(() => {
     if (data) {
       setLastUpdate(new Date());
@@ -23,7 +22,6 @@ export default function LeaderboardPage() {
     }
   }, [data]);
 
-  // Manual refresh function
   const handleManualRefresh = async () => {
     setIsRefreshing(true);
     await refetch();
@@ -38,35 +36,23 @@ export default function LeaderboardPage() {
     return `${hours}h ago`;
   };
 
-  const getRankIcon = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return <Crown className="text-yellow-400" size={32} />;
-      case 2:
-        return <Medal className="text-gray-300" size={28} />;
-      case 3:
-        return <Medal className="text-orange-400" size={28} />;
-      default:
-        return <span className="text-2xl font-black text-gray-500">#{rank}</span>;
-    }
+  const getRankBadge = (rank: number) => {
+    if (rank === 1) return { icon: Crown, style: 'text-amber-300 bg-amber-500/10 border-amber-500/40' };
+    if (rank === 2) return { icon: Medal, style: 'text-gray-200 bg-white/[0.06] border-white/25' };
+    if (rank === 3) return { icon: Medal, style: 'text-orange-300 bg-orange-500/10 border-orange-500/30' };
+    return { icon: null, style: '' };
   };
 
-  const getRankBg = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return 'from-yellow-600/30 to-orange-600/30 border-yellow-500/50';
-      case 2:
-        return 'from-gray-600/30 to-gray-700/30 border-gray-400/50';
-      case 3:
-        return 'from-orange-600/30 to-amber-600/30 border-orange-500/50';
-      default:
-        return 'from-gray-900/50 to-black/50 border-gray-700/30';
-    }
+  const getRowStyle = (rank: number) => {
+    if (rank === 1) return 'border-amber-500/40 bg-gradient-to-r from-amber-950/40 via-[#0e0e10] to-[#0e0e10]';
+    if (rank === 2) return 'border-white/15 bg-gradient-to-r from-white/[0.04] via-[#0e0e10] to-[#0e0e10]';
+    if (rank === 3) return 'border-orange-500/30 bg-gradient-to-r from-orange-950/30 via-[#0e0e10] to-[#0e0e10]';
+    return 'border-white/[0.06] bg-[#0e0e10]';
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-[#08080A] flex items-center justify-center">
         <LoadingSpinner size="lg" text="Loading leaderboard..." />
       </div>
     );
@@ -75,107 +61,107 @@ export default function LeaderboardPage() {
   const leaderboard = (data as any)?.leaderboard || [];
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Background effects */}
+    <div className="min-h-screen bg-[#08080A] text-white">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-96 h-96 bg-yellow-600/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-red-900/15 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-rose-950/25 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative max-w-5xl mx-auto container-mobile py-8 sm:py-12">
-        {/* Header */}
-        <div className="text-center mb-8 sm:mb-12 animate-fadeInUp">
-          <div className="inline-flex items-center space-x-2 px-3 sm:px-4 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full mb-4 sm:mb-6">
-            <Trophy className="text-yellow-400" size={16} />
-            <span className="text-yellow-300 text-xs sm:text-sm font-medium">Global Rankings</span>
-          </div>
-          
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-yellow-400 via-orange-300 to-red-500 bg-clip-text text-transparent animate-gradient">
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+        <header className="mb-8 sm:mb-10">
+          <p className="font-mono text-[11px] tracking-[0.3em] uppercase text-red-400/80 mb-2 inline-flex items-center gap-2">
+            <Trophy size={11} /> Rankings
+          </p>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight [text-wrap:balance]">
             Leaderboard
           </h1>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-300 max-w-2xl mx-auto px-4">
-            Compete with physicists worldwide and climb the ranks
+          <p className="text-gray-400 mt-2 text-sm sm:text-base">
+            Global XP standings. Updated live every 15s.
           </p>
 
-          {/* Real-time Update Status */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mt-4 sm:mt-6 px-4">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span className="text-green-300 text-xs sm:text-sm font-medium">Live Updates</span>
-            </div>
-            
+          <div className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] border border-white/10 rounded-full text-[11px] font-mono uppercase tracking-widest text-gray-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-emerald-300">Live</span>
+            <span className="text-gray-700">·</span>
+            <span>updated {getTimeAgo(lastUpdate)}</span>
             <button
+              type="button"
               onClick={handleManualRefresh}
               disabled={isRefreshing}
-              className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-full transition-colors disabled:opacity-50 touch-target"
+              aria-label="Refresh leaderboard"
+              className="ml-1 p-0.5 text-gray-500 hover:text-white transition-colors disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 text-blue-400 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span className="text-blue-300 text-xs sm:text-sm font-medium">
-                {isRefreshing ? 'Refreshing...' : 'Refresh'}
-              </span>
+              <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
-            
-            <div className="text-xs text-gray-500">
-              Updated {getTimeAgo(lastUpdate)}
-            </div>
           </div>
-        </div>
+        </header>
 
         {leaderboard.length > 0 ? (
-          <div className="space-y-3 sm:space-y-4">
-            <h2 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6 text-white">Rankings</h2>
-            
-            {leaderboard.map((user: any, index: number) => (
-              <div
-                key={user.id || index}
-                className={`flex items-center card-responsive bg-gradient-to-r ${getRankBg(index + 1)} backdrop-blur-sm border rounded-xl sm:rounded-2xl hover:scale-[1.02] transition-all duration-300 group`}
-              >
-                {/* Rank */}
-                <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 mr-3 sm:mr-6 flex-shrink-0">
-                  {getRankIcon(index + 1)}
-                </div>
+          <ol className="space-y-2.5">
+            {leaderboard.map((user: any, index: number) => {
+              const rank = index + 1;
+              const badge = getRankBadge(rank);
+              const initials = (user.name || 'U')
+                .split(' ')
+                .map((s: string) => s[0])
+                .slice(0, 2)
+                .join('')
+                .toUpperCase();
 
-                {/* Avatar */}
-                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-red-600 to-rose-600 flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0">
-                  {user.avatar ? (
-                    <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-sm sm:text-xl font-black text-white">{user.name?.charAt(0) || '?'}</span>
-                  )}
-                </div>
-
-                {/* User Info */}
-                <div className="flex-1 ml-3 sm:ml-4 min-w-0">
-                  <h3 className="text-sm sm:text-lg font-bold text-white group-hover:text-yellow-300 transition-colors truncate">
-                    {user.name || 'Unknown User'}
-                  </h3>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <TrendingUp size={12} />
-                      Level {user.level || 1}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Award size={12} />
-                      {user.achievements?.length || 0} achievements
-                    </span>
+              return (
+                <li
+                  key={user.id || index}
+                  className={`flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border transition-colors hover:border-red-500/40 ${getRowStyle(rank)}`}
+                >
+                  <div className={`shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center border ${
+                    rank <= 3 ? badge.style : 'bg-white/[0.03] border-white/10'
+                  }`}>
+                    {badge.icon ? (
+                      <badge.icon size={18} />
+                    ) : (
+                      <span className="font-mono font-bold text-gray-400 tabular-nums text-sm">
+                        {String(rank).padStart(2, '0')}
+                      </span>
+                    )}
                   </div>
-                </div>
 
-                {/* XP */}
-                <div className="text-right flex-shrink-0">
-                  <div className="text-lg sm:text-2xl font-black text-white mb-1">
-                    {(user.xp || 0).toLocaleString()}
+                  <div className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-red-600 to-rose-800 flex items-center justify-center text-xs sm:text-sm font-bold text-white overflow-hidden">
+                    {user.avatar ? (
+                      <img src={user.avatar} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      initials
+                    )}
                   </div>
-                  <div className="text-xs sm:text-sm text-gray-400">XP</div>
-                </div>
-              </div>
-            ))}
-          </div>
+
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm sm:text-base font-bold text-white truncate">
+                      {user.name || 'Unknown'}
+                    </h3>
+                    <div className="flex items-center gap-3 mt-0.5 text-[11px] font-mono text-gray-500 tabular-nums">
+                      <span className="inline-flex items-center gap-1">
+                        <TrendingUp size={10} /> LVL {user.level || 1}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <Award size={10} /> {user.achievements?.length || 0}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <div className="text-lg sm:text-xl font-black text-white tabular-nums leading-none">
+                      {(user.xp || 0).toLocaleString()}
+                    </div>
+                    <div className="text-[10px] font-mono uppercase tracking-widest text-red-400/80 mt-1">XP</div>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
         ) : (
-          <div className="text-center py-16 sm:py-20">
-            <Trophy className="mx-auto mb-4 text-gray-600" size={48} />
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-400 mb-2">No rankings yet</h3>
-            <p className="text-gray-500">Be the first to climb the leaderboard!</p>
+          <div className="rounded-2xl border border-white/[0.06] bg-[#0e0e10] p-14 text-center">
+            <Trophy className="mx-auto mb-4 text-gray-700" size={40} />
+            <h3 className="text-xl font-bold mb-1">No rankings yet</h3>
+            <p className="text-sm text-gray-500">Earn XP to appear on the board.</p>
           </div>
         )}
       </div>

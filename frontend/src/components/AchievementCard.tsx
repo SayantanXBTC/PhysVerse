@@ -1,4 +1,4 @@
-import { Lock, Star } from 'lucide-react';
+import { Lock, Star, CheckCircle } from 'lucide-react';
 
 interface Achievement {
   id: string;
@@ -16,78 +16,85 @@ interface AchievementCardProps {
   achievement: Achievement;
 }
 
-const rarityColors = {
-  common: 'from-gray-500 to-gray-600',
-  rare: 'from-blue-500 to-blue-600',
-  epic: 'from-purple-500 to-purple-600',
-  legendary: 'from-yellow-500 to-orange-600'
-};
-
-const rarityBorders = {
-  common: 'border-gray-500/30',
-  rare: 'border-blue-500/30',
-  epic: 'border-purple-500/30',
-  legendary: 'border-yellow-500/30'
+const rarityStyle: Record<Achievement['rarity'], { badge: string; icon: string; ring: string }> = {
+  common: {
+    badge: 'bg-white/[0.04] text-gray-300 border-white/15',
+    icon: 'from-gray-600 to-gray-800',
+    ring: 'border-white/10'
+  },
+  rare: {
+    badge: 'bg-red-500/10 text-red-300 border-red-500/25',
+    icon: 'from-red-600 to-red-800',
+    ring: 'border-red-500/25'
+  },
+  epic: {
+    badge: 'bg-rose-500/15 text-rose-200 border-rose-500/35',
+    icon: 'from-rose-600 to-red-900',
+    ring: 'border-rose-500/35'
+  },
+  legendary: {
+    badge: 'bg-amber-500/15 text-amber-200 border-amber-500/40',
+    icon: 'from-amber-500 to-red-700',
+    ring: 'border-amber-500/40'
+  }
 };
 
 export default function AchievementCard({ achievement }: AchievementCardProps) {
+  const s = rarityStyle[achievement.rarity];
+  const unlocked = achievement.unlocked;
+
   return (
-    <div
-      className={`relative p-6 rounded-2xl border-2 transition-all duration-300 ${
-        achievement.unlocked
-          ? `bg-gradient-to-br ${rarityColors[achievement.rarity]}/20 ${rarityBorders[achievement.rarity]} hover:scale-105`
-          : 'bg-gray-900/50 border-gray-700/30 opacity-60'
+    <article
+      className={`relative rounded-2xl border p-5 transition-all duration-200 ${
+        unlocked
+          ? `bg-[#0e0e10] ${s.ring} hover:border-red-500/50`
+          : 'bg-[#0a0a0c] border-white/[0.04] opacity-60'
       }`}
     >
-      {/* Rarity Badge */}
-      <div className="absolute top-3 right-3">
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r ${rarityColors[achievement.rarity]} text-white shadow-lg`}
-        >
-          {achievement.rarity.toUpperCase()}
-        </span>
-      </div>
-
-      {/* Icon */}
-      <div className="flex items-center justify-center mb-4">
+      <div className="flex items-start gap-4">
         <div
-          className={`w-20 h-20 rounded-full flex items-center justify-center text-4xl ${
-            achievement.unlocked
-              ? `bg-gradient-to-br ${rarityColors[achievement.rarity]} shadow-lg`
-              : 'bg-gray-800'
+          className={`shrink-0 w-14 h-14 rounded-xl flex items-center justify-center text-2xl border ${
+            unlocked
+              ? `bg-gradient-to-br ${s.icon} border-white/10 shadow-lg shadow-red-950/40`
+              : 'bg-black/40 border-white/[0.06]'
           }`}
         >
-          {achievement.unlocked ? achievement.icon : <Lock size={32} className="text-gray-600" />}
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="text-center">
-        <h3 className="text-xl font-bold mb-2 text-white">{achievement.name}</h3>
-        <p className="text-sm text-gray-400 mb-4">{achievement.description}</p>
-
-        {/* XP Reward */}
-        <div className="flex items-center justify-center gap-2 text-yellow-400">
-          <Star size={16} fill="currentColor" />
-          <span className="font-bold">{achievement.xpReward} XP</span>
+          {unlocked ? achievement.icon : <Lock size={20} className="text-gray-600" />}
         </div>
 
-        {/* Category */}
-        <div className="mt-3">
-          <span className="px-3 py-1 bg-gray-800/50 rounded-full text-xs text-gray-400">
-            {achievement.category}
-          </span>
-        </div>
-
-        {/* Unlocked Status */}
-        {achievement.unlocked && achievement.unlockedAt && (
-          <div className="mt-4 pt-4 border-t border-gray-700/50">
-            <p className="text-xs text-green-400">
-              ✓ Unlocked {new Date(achievement.unlockedAt).toLocaleDateString()}
-            </p>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2 mb-1.5">
+            <h3 className="text-sm font-bold text-white leading-tight">{achievement.name}</h3>
+            <span
+              className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-widest border ${s.badge}`}
+            >
+              {achievement.rarity}
+            </span>
           </div>
-        )}
+
+          <p className="text-xs text-gray-400 leading-relaxed mb-3 [text-wrap:pretty]">
+            {achievement.description}
+          </p>
+
+          <div className="flex items-center justify-between text-[11px]">
+            <div className="inline-flex items-center gap-1 font-mono text-red-300 tabular-nums">
+              <Star size={11} fill="currentColor" />
+              <span className="font-bold">{achievement.xpReward}</span>
+              <span className="text-gray-500">XP</span>
+            </div>
+            <span className="font-mono uppercase tracking-widest text-gray-500 text-[10px]">
+              {achievement.category}
+            </span>
+          </div>
+
+          {unlocked && achievement.unlockedAt && (
+            <div className="mt-3 pt-3 border-t border-white/[0.06] inline-flex items-center gap-1 text-[10px] font-mono text-emerald-400">
+              <CheckCircle size={10} />
+              Unlocked {new Date(achievement.unlockedAt).toLocaleDateString()}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </article>
   );
 }

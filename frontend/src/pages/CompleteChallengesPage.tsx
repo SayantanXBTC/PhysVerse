@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Target, Clock, Star, Zap, Award, CheckCircle, Lock, Play, X } from 'lucide-react';
+import { Trophy, Target, Clock, Zap, Award, CheckCircle, Lock, Play, X } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
 
@@ -35,7 +35,6 @@ export default function CompleteChallengesPage() {
   const [userInputs, setUserInputs] = useState<Record<string, number>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Load challenges from localStorage
   const [challenges, setChallenges] = useState<Challenge[]>([
     {
       id: '1',
@@ -179,7 +178,6 @@ export default function CompleteChallengesPage() {
   ]);
 
   useEffect(() => {
-    // Load progress from localStorage
     const savedProgress = localStorage.getItem('challengeProgress');
     if (savedProgress) {
       try {
@@ -211,19 +209,19 @@ export default function CompleteChallengesPage() {
     localStorage.setItem('challengeProgress', JSON.stringify(progress));
   };
 
-  const difficultyColors = {
-    beginner: 'from-green-500 to-emerald-500',
-    intermediate: 'from-blue-500 to-cyan-500',
-    advanced: 'from-orange-500 to-red-500',
-    expert: 'from-purple-500 to-pink-500'
-  };
+  const difficultyStyle = {
+    beginner: 'text-emerald-300 bg-emerald-500/10 border-emerald-500/25',
+    intermediate: 'text-amber-300 bg-amber-500/10 border-amber-500/25',
+    advanced: 'text-orange-300 bg-orange-500/10 border-orange-500/25',
+    expert: 'text-red-300 bg-red-500/10 border-red-500/30'
+  } as const;
 
   const difficultyIcons = {
-    beginner: '⭐',
-    intermediate: '⭐⭐',
-    advanced: '⭐⭐⭐',
-    expert: '⭐⭐⭐⭐'
-  };
+    beginner: '★',
+    intermediate: '★★',
+    advanced: '★★★',
+    expert: '★★★★'
+  } as const;
 
   const filteredChallenges = selectedDifficulty === 'all' 
     ? challenges 
@@ -254,7 +252,6 @@ export default function CompleteChallengesPage() {
 
     setIsSubmitting(true);
 
-    // Check if all required inputs are provided
     const allInputsProvided = selectedChallenge.targetValues.every(
       target => userInputs[target.parameter] !== undefined
     );
@@ -265,7 +262,6 @@ export default function CompleteChallengesPage() {
       return;
     }
 
-    // Validate inputs against target values
     const allCorrect = selectedChallenge.targetValues.every(target => {
       const userValue = userInputs[target.parameter];
       return userValue >= target.min && userValue <= target.max;
@@ -284,7 +280,6 @@ export default function CompleteChallengesPage() {
         return c;
       });
 
-      // Unlock next challenge if this one is completed
       if (allCorrect) {
         const currentIndex = challenges.findIndex(c => c.id === selectedChallenge.id);
         if (currentIndex < challenges.length - 1) {
@@ -307,283 +302,273 @@ export default function CompleteChallengesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Background effects */}
+    <div className="min-h-screen bg-[#08080A] text-white">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-red-900/15 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-rose-950/25 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center space-x-2 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full mb-6">
-            <Trophy className="text-purple-400" size={20} />
-            <span className="text-purple-300 text-sm font-medium">Physics Challenges</span>
-          </div>
-          <h1 className="text-5xl font-black mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent">
-            Test Your Skills
-          </h1>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Complete challenges, earn points, and master physics concepts
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+        <header className="mb-8 sm:mb-10">
+          <p className="font-mono text-[11px] tracking-[0.3em] uppercase text-red-400/80 mb-2">
+            Missions
           </p>
-        </div>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight [text-wrap:balance]">
+            Physics Challenges
+          </h1>
+          <p className="text-gray-400 mt-2 text-sm sm:text-base max-w-xl">
+            Test your intuition. Solve real physics problems. Earn XP as you climb.
+          </p>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="glass-red p-6 rounded-2xl text-center">
-            <Trophy className="mx-auto mb-3 text-yellow-400" size={32} />
-            <div className="text-3xl font-black text-white mb-1">{totalPoints}</div>
-            <div className="text-sm text-gray-400">Total Points</div>
-          </div>
-          <div className="glass-red p-6 rounded-2xl text-center">
-            <CheckCircle className="mx-auto mb-3 text-green-400" size={32} />
-            <div className="text-3xl font-black text-white mb-1">{completedCount}/{challenges.length}</div>
-            <div className="text-sm text-gray-400">Completed</div>
-          </div>
-          <div className="glass-red p-6 rounded-2xl text-center">
-            <Star className="mx-auto mb-3 text-purple-400" size={32} />
-            <div className="text-3xl font-black text-white mb-1">
+          <div className="mt-6 inline-flex flex-wrap items-center gap-3 sm:gap-5 text-xs font-mono uppercase tracking-widest">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/25 rounded-full text-red-300">
+              <span className="text-white font-bold tabular-nums text-sm">{totalPoints}</span> XP
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.03] border border-white/10 rounded-full text-gray-400">
+              <span className="text-white font-bold tabular-nums text-sm">{completedCount}/{challenges.length}</span> Solved
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.03] border border-white/10 rounded-full text-red-300">
               {completedCount === 0 ? 'Novice' : completedCount < 3 ? 'Apprentice' : completedCount < 6 ? 'Expert' : 'Master'}
             </div>
-            <div className="text-sm text-gray-400">Rank</div>
           </div>
+        </header>
+
+        <div className="flex flex-wrap gap-1.5 mb-8">
+          {['all', 'beginner', 'intermediate', 'advanced', 'expert'].map((diff) => {
+            const active = selectedDifficulty === diff;
+            return (
+              <button
+                key={diff}
+                type="button"
+                onClick={() => setSelectedDifficulty(diff)}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  active
+                    ? 'bg-red-500/15 text-red-300 border border-red-500/40'
+                    : 'bg-white/[0.03] text-gray-400 border border-white/10 hover:text-white hover:border-white/20'
+                }`}
+              >
+                {diff.charAt(0).toUpperCase() + diff.slice(1)}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Difficulty Filter */}
-        <div className="flex flex-wrap justify-center gap-3 mb-8">
-          {['all', 'beginner', 'intermediate', 'advanced', 'expert'].map((diff) => (
-            <button
-              key={diff}
-              type="button"
-              onClick={() => setSelectedDifficulty(diff)}
-              className={`px-6 py-2 rounded-xl font-semibold transition-all duration-300 ${
-                selectedDifficulty === diff
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/50'
-                  : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
-              }`}
-            >
-              {diff.charAt(0).toUpperCase() + diff.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {/* Challenges Grid */}
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid sm:grid-cols-2 gap-4">
           {filteredChallenges.map((challenge) => (
-            <div
+            <article
               key={challenge.id}
-              className={`glass-red p-6 rounded-2xl border-2 transition-all duration-300 hover:scale-105 ${
-                challenge.locked 
-                  ? 'border-gray-700/50 opacity-60' 
+              className={`relative rounded-2xl border bg-[#0e0e10] p-5 transition-all duration-200 ${
+                challenge.locked
+                  ? 'border-white/[0.04] opacity-60'
                   : challenge.completed
-                  ? 'border-green-500/50'
-                  : 'border-purple-500/30 hover:border-purple-500/60'
+                  ? 'border-emerald-500/25 hover:border-emerald-500/50'
+                  : 'border-white/[0.06] hover:border-red-500/40'
               }`}
             >
-              {/* Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r ${difficultyColors[challenge.difficulty]} text-white`}>
-                      {difficultyIcons[challenge.difficulty]} {challenge.difficulty.toUpperCase()}
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-widest border ${difficultyStyle[challenge.difficulty]}`}>
+                      <span>{difficultyIcons[challenge.difficulty]}</span>
+                      {challenge.difficulty}
                     </span>
                     {challenge.completed && (
-                      <CheckCircle className="text-green-400" size={20} />
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-widest border border-emerald-500/30 bg-emerald-500/10 text-emerald-300">
+                        <CheckCircle size={10} /> Solved
+                      </span>
                     )}
                     {challenge.locked && (
-                      <Lock className="text-gray-500" size={20} />
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-widest border border-white/10 bg-white/[0.03] text-gray-500">
+                        <Lock size={10} /> Locked
+                      </span>
                     )}
                   </div>
-                  <h3 className="text-2xl font-black text-white mb-2">{challenge.title}</h3>
-                  <p className="text-gray-400 text-sm">{challenge.description}</p>
+                  <h3 className="text-lg font-bold text-white leading-tight mb-1">{challenge.title}</h3>
+                  <p className="text-xs text-gray-400 leading-relaxed [text-wrap:pretty]">{challenge.description}</p>
                 </div>
-                <div className="flex items-center gap-1 text-yellow-400 font-black text-xl">
-                  <Award size={24} />
-                  {challenge.points}
-                </div>
-              </div>
-
-              {/* Objective */}
-              <div className="mb-4 p-4 bg-black/30 rounded-xl border border-purple-500/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <Target className="text-purple-400" size={16} />
-                  <span className="text-sm font-bold text-purple-300">Objective</span>
-                </div>
-                <p className="text-sm text-gray-300">{challenge.objective}</p>
-              </div>
-
-              {/* Stats */}
-              <div className="flex items-center gap-4 mb-4 text-sm">
-                {challenge.timeLimit && (
-                  <div className="flex items-center gap-2 text-gray-400">
-                    <Clock size={16} />
-                    <span>Time Limit: {challenge.timeLimit}s</span>
+                <div className="shrink-0 text-right">
+                  <div className="inline-flex items-center gap-1 text-red-300 font-mono font-bold tabular-nums text-sm">
+                    <Award size={12} />
+                    {challenge.points}
                   </div>
-                )}
-                {challenge.attempts > 0 && (
-                  <div className="flex items-center gap-2 text-gray-400">
-                    <Zap size={16} />
-                    <span>Attempts: {challenge.attempts}</span>
-                  </div>
-                )}
+                  <p className="text-[9px] font-mono uppercase tracking-widest text-gray-600 mt-0.5">XP</p>
+                </div>
               </div>
 
-              {/* Hints */}
-              <details className="mb-4">
-                <summary className="cursor-pointer text-sm font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-2">
-                  <Zap size={16} />
-                  Show Hints ({challenge.hints.length})
+              <div className="mb-3 p-3 rounded-lg border border-red-500/15 bg-red-500/[0.04]">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Target className="text-red-400" size={11} />
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-red-300">Objective</span>
+                </div>
+                <p className="text-xs text-gray-300 leading-relaxed">{challenge.objective}</p>
+              </div>
+
+              {(challenge.timeLimit || challenge.attempts > 0) && (
+                <div className="flex items-center gap-3 mb-3 text-[11px] font-mono text-gray-500 tabular-nums">
+                  {challenge.timeLimit && (
+                    <span className="inline-flex items-center gap-1">
+                      <Clock size={11} /> {challenge.timeLimit}s
+                    </span>
+                  )}
+                  {challenge.attempts > 0 && (
+                    <span className="inline-flex items-center gap-1">
+                      <Zap size={11} /> {challenge.attempts} tries
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <details className="mb-3 group/hints">
+                <summary className="cursor-pointer list-none flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-widest text-gray-400 hover:text-red-300 transition-colors">
+                  <Zap size={11} />
+                  Hints · {challenge.hints.length}
                 </summary>
-                <ul className="mt-3 space-y-2 pl-6">
+                <ul className="mt-2 space-y-1 pl-4 border-l border-white/10">
                   {challenge.hints.map((hint, idx) => (
-                    <li key={idx} className="text-sm text-gray-400 list-disc">
-                      {hint}
-                    </li>
+                    <li key={idx} className="text-xs text-gray-400 leading-relaxed">{hint}</li>
                   ))}
                 </ul>
               </details>
 
-              {/* Action Button */}
               {challenge.locked ? (
                 <button
                   type="button"
                   disabled
-                  className="w-full px-6 py-3 bg-gray-700/50 text-gray-500 rounded-xl font-bold cursor-not-allowed"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-white/[0.03] border border-white/10 text-gray-600 rounded-lg text-xs font-semibold cursor-not-allowed"
                 >
-                  <div className="flex items-center justify-center gap-2">
-                    <Lock size={20} />
-                    Complete previous challenges to unlock
-                  </div>
+                  <Lock size={12} />
+                  Complete previous to unlock
                 </button>
               ) : challenge.completed ? (
                 <button
                   type="button"
                   onClick={() => handleStartChallenge(challenge)}
-                  className="w-full px-6 py-3 bg-green-500/20 border-2 border-green-500/50 text-green-400 rounded-xl font-bold hover:bg-green-500/30 transition-all"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/60 text-emerald-300 rounded-lg text-xs font-semibold transition-colors"
                 >
-                  <div className="flex items-center justify-center gap-2">
-                    <CheckCircle size={20} />
-                    Completed - Try Again
-                  </div>
+                  <CheckCircle size={12} />
+                  Try again
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={() => handleStartChallenge(challenge)}
-                  className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-purple-500/50 hover:shadow-purple-500/70"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-semibold transition-colors shadow-md shadow-red-950/40"
                 >
-                  <div className="flex items-center justify-center gap-2">
-                    <Play size={20} />
-                    Start Challenge
-                  </div>
+                  <Play size={12} />
+                  Start Challenge
                 </button>
               )}
-            </div>
+            </article>
           ))}
         </div>
 
-        {/* Leaderboard Teaser */}
-        <div className="mt-12 glass-red p-8 rounded-2xl text-center border-2 border-purple-500/30">
-          <Trophy className="mx-auto mb-4 text-yellow-400" size={48} />
-          <h3 className="text-2xl font-black text-white mb-2">Global Leaderboard</h3>
-          <p className="text-gray-400 mb-6">
-            Compete with physics enthusiasts worldwide!
-          </p>
+        <div className="mt-10 text-center">
           <button
             type="button"
             onClick={() => navigate('/leaderboard')}
-            className="px-8 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-yellow-500/50"
+            className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white border-b border-white/10 hover:border-white/40 pb-1 transition-colors"
           >
-            View Leaderboard
+            <Trophy size={14} />
+            View global leaderboard
           </button>
         </div>
       </div>
 
-      {/* Challenge Modal */}
       {showChallengeModal && selectedChallenge && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
-          <div className="glass-red p-8 rounded-2xl max-w-2xl w-full animate-bounceIn max-h-[90vh] overflow-y-auto">
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <h2 className="text-3xl font-black text-white mb-2">{selectedChallenge.title}</h2>
-                <p className="text-gray-400">{selectedChallenge.description}</p>
+        <div
+          className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowChallengeModal(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="w-full max-w-lg rounded-2xl border border-red-500/25 bg-[#0e0e10] p-6 shadow-2xl shadow-red-950/50 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-start justify-between gap-3 mb-5">
+              <div className="min-w-0">
+                <p className="font-mono text-[10px] tracking-widest uppercase text-red-400 mb-1">Challenge</p>
+                <h2 className="text-xl font-black text-white leading-tight">{selectedChallenge.title}</h2>
+                <p className="text-xs text-gray-400 mt-1">{selectedChallenge.description}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowChallengeModal(false)}
-                className="p-2 hover:bg-red-500/20 rounded-lg transition-all"
-                aria-label="Close modal"
+                className="shrink-0 p-1.5 hover:bg-white/[0.05] rounded-md text-gray-500 hover:text-white transition-colors"
+                aria-label="Close"
               >
-                <X size={24} className="text-gray-400 hover:text-white" />
+                <X size={16} />
               </button>
             </div>
 
-            {/* Objective */}
-            <div className="mb-6 p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl">
-              <h3 className="font-bold text-purple-300 mb-2">🎯 Objective</h3>
-              <p className="text-gray-300">{selectedChallenge.objective}</p>
+            <div className="mb-5 p-3 rounded-lg border border-red-500/20 bg-red-500/[0.05]">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Target size={11} className="text-red-400" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-red-300">Objective</span>
+              </div>
+              <p className="text-xs text-gray-300">{selectedChallenge.objective}</p>
             </div>
 
-            {/* Input Parameters */}
-            <div className="space-y-4 mb-6">
-              <h3 className="font-bold text-white text-lg">Enter Your Values:</h3>
+            <div className="space-y-3 mb-5">
+              <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500">Enter values</p>
               {selectedChallenge.targetValues.map((target) => (
                 <div key={target.parameter}>
-                  <label className="block text-sm font-medium text-gray-300 mb-2 capitalize">
-                    {target.parameter.replace(/([A-Z])/g, ' $1').trim()} ({target.unit})
+                  <label className="block text-xs font-semibold text-gray-300 mb-1.5 capitalize">
+                    {target.parameter.replace(/([A-Z])/g, ' $1').trim()} <span className="text-gray-500 font-mono">({target.unit})</span>
                   </label>
                   <input
                     type="number"
                     step="any"
                     value={userInputs[target.parameter] || ''}
-                    onChange={(e) => setUserInputs(prev => ({
+                    onChange={(e) => setUserInputs((prev) => ({
                       ...prev,
                       [target.parameter]: parseFloat(e.target.value)
                     }))}
-                    className="w-full px-4 py-3 bg-black/50 border-2 border-gray-700/50 rounded-xl focus:outline-none focus:border-purple-500/50 text-white"
-                    placeholder={`Enter ${target.parameter}...`}
+                    className="w-full px-3 py-2 bg-black/40 border border-white/10 focus:border-red-500/50 rounded-md text-sm text-white font-mono tabular-nums outline-none transition-colors"
+                    placeholder={`Enter value…`}
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Target range: {target.min} - {target.max} {target.unit}
+                  <p className="text-[10px] font-mono text-gray-500 mt-1 tabular-nums">
+                    Target: {target.min} – {target.max} {target.unit}
                   </p>
                 </div>
               ))}
             </div>
 
-            {/* Hints */}
-            <div className="mb-6 p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-xl">
-              <h3 className="font-bold text-cyan-300 mb-2">💡 Hints</h3>
+            <div className="mb-5 p-3 rounded-lg border border-white/[0.06] bg-white/[0.02]">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <Zap size={11} className="text-red-400" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-gray-400">Hints</span>
+              </div>
               <ul className="space-y-1">
                 {selectedChallenge.hints.map((hint, idx) => (
-                  <li key={idx} className="text-sm text-gray-300">• {hint}</li>
+                  <li key={idx} className="text-xs text-gray-400">· {hint}</li>
                 ))}
               </ul>
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-3">
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowChallengeModal(false)}
+                className="flex-1 px-4 py-2.5 bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 text-gray-300 text-sm font-semibold rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
               <button
                 type="button"
                 onClick={handleSubmitChallenge}
                 disabled={isSubmitting}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-xl font-bold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Checking...
-                  </div>
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    Checking…
+                  </>
                 ) : (
-                  'Submit Solution'
+                  'Submit'
                 )}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowChallengeModal(false)}
-                className="px-6 py-3 bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700/50 rounded-xl font-semibold transition-all"
-              >
-                Cancel
               </button>
             </div>
           </div>

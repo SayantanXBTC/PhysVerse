@@ -43,3 +43,6 @@ Thumbs.db
 .cache/
 .temp/
 .tmp/
+
+# Claude Code local
+.claude/

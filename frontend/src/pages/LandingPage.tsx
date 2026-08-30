@@ -165,7 +165,7 @@ export default function LandingPage() {
             simulations across mechanics, quantum, relativity, and more.
           </p>
           
-          {isAuthenticated ? (
+          {isAuthenticated && user ? (
             <div className="flex flex-col sm:flex-row justify-start gap-3 sm:gap-4 mb-8 sm:mb-12 lg:mb-16">
               <div className="flex items-center gap-3 px-6 py-3 bg-red-950/30 border border-red-500/30 rounded-xl backdrop-blur-sm">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-600 to-rose-600 flex items-center justify-center">

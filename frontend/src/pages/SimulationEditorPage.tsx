@@ -159,7 +159,7 @@ export default function SimulationEditorPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[#08080A] text-white">
+    <div className="min-h-screen lg:h-screen flex flex-col bg-[#08080A] text-white">
       <header className="relative z-10 border-b border-white/[0.06] bg-[#0c0c0f]/95 backdrop-blur-xl px-4 sm:px-6 py-3">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -254,7 +254,7 @@ export default function SimulationEditorPage() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+      <div className="flex-1 flex flex-col lg:flex-row lg:overflow-hidden min-h-0">
         <div className="flex-1 relative flex flex-col overflow-hidden bg-[#050507] min-h-[50vh] lg:min-h-0">
           <div className={`relative ${showChart ? 'flex-1' : 'h-full'} overflow-hidden transition-all duration-300 min-h-[280px]`}>
             <SimulationCanvas simulationId={simulationId} parameters={parameters} isRunning={isRunning} />
@@ -293,10 +293,10 @@ export default function SimulationEditorPage() {
 
           <div
             className={`overflow-hidden transition-all duration-300 ease-out flex-shrink-0 border-t border-white/[0.06] bg-[#0a0a0c] ${
-              showChart ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+              showChart ? 'max-h-[420px] opacity-100' : 'max-h-0 opacity-0'
             }`}
           >
-            <div className="h-96 p-4">
+            <div className="h-[320px] sm:h-[380px] lg:h-96 p-3 sm:p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <Activity size={13} className="text-red-400" />
@@ -323,7 +323,7 @@ export default function SimulationEditorPage() {
           </div>
         </div>
 
-        <aside className="w-full lg:w-96 lg:shrink-0 bg-[#0a0a0c] border-t lg:border-t-0 lg:border-l border-white/[0.06] overflow-y-auto max-h-[60vh] lg:max-h-none">
+        <aside className="w-full lg:w-96 lg:shrink-0 bg-[#0a0a0c] border-t lg:border-t-0 lg:border-l border-white/[0.06] lg:overflow-y-auto">
           <div className="p-5 space-y-5">
             <div>
               <div className="flex items-center justify-between mb-2">

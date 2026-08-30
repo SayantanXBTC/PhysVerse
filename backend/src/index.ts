@@ -18,6 +18,9 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 const IS_PROD = process.env.NODE_ENV === 'production';
 
+// Render/Netlify sit behind a proxy — trust it so rate-limit + req.ip see real client IP
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
@@ -59,10 +62,24 @@ app.use(cors({
   maxAge: 600 // Cache preflight for 10 minutes
 }));
 
-// Rate limiting
+// Health check — MUST sit before rate limiter so Render pings don't consume quota
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+app.get('/', (_req, res) => {
+  res.json({ status: 'ok', service: 'physverse-api' });
+});
+
+// Rate limiting — raised ceiling + skip health probes + skip preflight
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 600,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.method === 'OPTIONS' || req.path === '/health' || req.path === '/api/health'
 });
 app.use('/api/', limiter);
 
@@ -75,11 +92,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/simulations', simulationRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/gamification', gamificationRoutes);
-
-// Health check
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
 
 // 404 handler
 app.use((_req, res) => {

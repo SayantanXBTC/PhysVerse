@@ -255,8 +255,8 @@ export default function SimulationEditorPage() {
       </header>
 
       <div className="flex-1 flex flex-col lg:flex-row lg:overflow-hidden min-h-0">
-        <div className="flex-1 relative flex flex-col overflow-hidden bg-[#050507] min-h-[50vh] lg:min-h-0">
-          <div className={`relative ${showChart ? 'flex-1' : 'h-full'} overflow-hidden transition-all duration-300 min-h-[280px]`}>
+        <div className="lg:flex-1 relative flex flex-col overflow-hidden bg-[#050507] shrink-0 lg:shrink lg:min-h-0">
+          <div className="relative h-[50vh] lg:h-auto lg:flex-1 overflow-hidden transition-all duration-300 lg:min-h-[280px]">
             <SimulationCanvas simulationId={simulationId} parameters={parameters} isRunning={isRunning} />
 
             <div className="pointer-events-none absolute inset-0">
@@ -292,11 +292,11 @@ export default function SimulationEditorPage() {
           </div>
 
           <div
-            className={`overflow-hidden transition-all duration-300 ease-out flex-shrink-0 border-t border-white/[0.06] bg-[#0a0a0c] ${
-              showChart ? 'max-h-[420px] opacity-100' : 'max-h-0 opacity-0'
+            className={`flex-shrink-0 border-t border-white/[0.06] bg-[#0a0a0c] transition-[height,opacity] duration-300 ease-out overflow-hidden ${
+              showChart ? 'h-[340px] sm:h-[400px] lg:h-96 opacity-100' : 'h-0 opacity-0'
             }`}
           >
-            <div className="h-[320px] sm:h-[380px] lg:h-96 p-3 sm:p-4">
+            <div className="h-full p-3 sm:p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <Activity size={13} className="text-red-400" />
@@ -306,7 +306,7 @@ export default function SimulationEditorPage() {
                   {chartData.length}/150 samples
                 </span>
               </div>
-              <div className="h-[calc(100%-24px)]">
+              <div className="h-[calc(100%-28px)]">
                 <SimulationDataChart
                   key={chartKey}
                   data={chartData}

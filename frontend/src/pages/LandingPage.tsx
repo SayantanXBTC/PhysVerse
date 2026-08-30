@@ -256,12 +256,10 @@ export default function LandingPage() {
                   featured ? 'col-span-2 row-span-2' : ''
                 }`}
               >
-                {/* Live preview — desktop only for perf */}
-                {!isMobile && (
-                  <div className="absolute inset-0 opacity-100">
-                    <LiveSimulationPreview variant={sim.variant} intensity={1.8} />
-                  </div>
-                )}
+                {/* Live preview — lower intensity on mobile for perf */}
+                <div className="absolute inset-0 opacity-100">
+                  <LiveSimulationPreview variant={sim.variant} intensity={isMobile ? 1.4 : 1.8} />
+                </div>
                 {/* Readability scrim — only bottom third, keeps sim visible */}
                 <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/75 to-transparent pointer-events-none" />
 

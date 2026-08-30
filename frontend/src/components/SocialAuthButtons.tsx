@@ -44,23 +44,24 @@ export default function SocialAuthButtons({ mode }: Props) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div
-        className="flex justify-center rounded-xl overflow-hidden border border-gray-700/40 hover:border-red-500/40 transition-colors bg-white/[0.02] p-1"
+        className="flex justify-center [color-scheme:dark] [&>*]:!w-full [&_iframe]:!w-full"
         aria-busy={googleMutation.isPending}
       >
         <GoogleLogin
           onSuccess={handleSuccess}
           onError={() => toast.error('Google sign-in failed')}
           theme="filled_black"
-          shape="pill"
+          shape="rectangular"
           size="large"
           text={mode === 'signup' ? 'signup_with' : 'signin_with'}
-          width="320"
+          logo_alignment="center"
+          width="280"
         />
       </div>
       {googleMutation.isPending && (
-        <p className="text-xs text-center text-gray-400">Verifying Google credentials…</p>
+        <p className="text-[11px] text-center text-gray-400">Verifying Google credentials…</p>
       )}
     </div>
   );

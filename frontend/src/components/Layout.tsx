@@ -1,6 +1,7 @@
+import { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
-import { LogOut, Home, LayoutDashboard, Globe, Trophy, BookOpen, Award } from 'lucide-react';
+import { LogOut, Home, LayoutDashboard, Globe, Trophy, BookOpen, Award, Menu, X, User } from 'lucide-react';
 
 const NAV = [
   { to: '/', label: 'Home', icon: Home },
@@ -15,11 +16,28 @@ export default function Layout() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/');
+    setMenuOpen(false);
   };
+
+  // Close menu on route change
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  // Lock body scroll when menu open
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [menuOpen]);
 
   const initials = (user?.name || 'U')
     .split(' ')
@@ -35,7 +53,7 @@ export default function Layout() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
-      <nav className="relative bg-black/70 border-b border-red-500/20 backdrop-blur-xl">
+      <nav className="relative bg-black/70 border-b border-red-500/20 backdrop-blur-xl z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 gap-4">
             <div className="flex items-center gap-6 min-w-0">
@@ -56,6 +74,7 @@ export default function Layout() {
                 </span>
               </Link>
 
+              {/* Desktop nav */}
               <div className="hidden md:flex items-center gap-1">
                 {NAV.map((item) => {
                   const active = item.to === '/' ? pathname === '/' : pathname.startsWith(item.to);
@@ -80,8 +99,9 @@ export default function Layout() {
               </div>
             </div>
 
+            {/* Desktop user area */}
             {user && (
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="hidden md:flex items-center gap-2 shrink-0">
                 <Link
                   to="/profile"
                   className="hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-md hover:bg-white/[0.04] transition-colors group max-w-[220px]"
@@ -106,13 +126,100 @@ export default function Layout() {
                   aria-label="Logout"
                 >
                   <LogOut size={14} />
-                  <span className="hidden sm:inline">Logout</span>
+                  <span>Logout</span>
+                </button>
+              </div>
+            )}
+
+            {/* Mobile menu toggle */}
+            <button
+              type="button"
+              onClick={() => setMenuOpen((v) => !v)}
+              className="md:hidden inline-flex items-center justify-center w-9 h-9 rounded-md bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 text-white transition-colors"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+            >
+              {menuOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile menu drawer */}
+      {menuOpen && (
+        <>
+          <button
+            type="button"
+            aria-label="Close menu backdrop"
+            onClick={() => setMenuOpen(false)}
+            className="md:hidden fixed inset-0 top-14 bg-black/70 backdrop-blur-sm z-40"
+          />
+          <div
+            className="md:hidden fixed left-0 right-0 top-14 z-40 bg-[#0a0a0c] border-b border-red-500/20 shadow-2xl shadow-red-950/40 max-h-[calc(100vh-3.5rem)] overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Main menu"
+          >
+            {user && (
+              <Link
+                to="/profile"
+                className="flex items-center gap-3 p-4 border-b border-white/[0.06] hover:bg-white/[0.03] transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-600 to-rose-700 flex items-center justify-center text-sm font-bold text-white shrink-0 shadow-md shadow-red-950/50">
+                  {user.avatar ? (
+                    <img src={user.avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    initials
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-white truncate">{user.name}</p>
+                  <p className="text-[11px] text-gray-500 truncate">{user.email}</p>
+                </div>
+                <User size={14} className="text-gray-500" />
+              </Link>
+            )}
+
+            <div className="p-2 space-y-0.5">
+              {NAV.map((item) => {
+                const active = item.to === '/' ? pathname === '/' : pathname.startsWith(item.to);
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
+                      active
+                        ? 'text-white bg-red-500/15 border border-red-500/30'
+                        : 'text-gray-300 hover:text-white hover:bg-white/[0.04] border border-transparent'
+                    }`}
+                  >
+                    <item.icon size={16} />
+                    <span>{item.label}</span>
+                    {active && (
+                      <span className="ml-auto text-[10px] font-mono uppercase tracking-widest text-red-400">
+                        Active
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+
+            {user && (
+              <div className="p-2 border-t border-white/[0.06]">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full inline-flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-red-300 hover:text-white bg-white/[0.03] hover:bg-red-500/15 border border-white/10 hover:border-red-500/40 transition-colors"
+                >
+                  <LogOut size={16} />
+                  <span>Logout</span>
                 </button>
               </div>
             )}
           </div>
-        </div>
-      </nav>
+        </>
+      )}
 
       <main className="relative">
         <Outlet />

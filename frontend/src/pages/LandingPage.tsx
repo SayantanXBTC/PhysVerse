@@ -28,7 +28,7 @@ export default function LandingPage() {
   const handleLogout = () => {
     logout();
     toast.success('Logged out successfully');
-    navigate('/');
+    window.location.assign('/');
   };
 
   const createSlug = (name: string) => {

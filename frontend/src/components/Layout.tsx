@@ -20,8 +20,9 @@ export default function Layout() {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
     setMenuOpen(false);
+    // Hard reload so all cached queries + subscribers reset cleanly
+    window.location.assign('/');
   };
 
   // Close menu on route change

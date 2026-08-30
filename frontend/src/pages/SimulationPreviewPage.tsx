@@ -107,8 +107,8 @@ export default function SimulationPreviewPage() {
 
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
         {/* Canvas Area */}
-        <div className="flex-1 relative flex flex-col overflow-hidden order-2 lg:order-1">
-          <div className={showChart ? 'flex-1 overflow-hidden' : 'h-full overflow-hidden'}>
+        <div className="flex-1 relative flex flex-col overflow-hidden order-2 lg:order-1 min-h-[50vh] lg:min-h-0">
+          <div className={`${showChart ? 'flex-1 overflow-hidden' : 'h-full overflow-hidden'} min-h-[280px]`}>
             <SimulationCanvas
               simulationId={simulationId}
               parameters={parameters}

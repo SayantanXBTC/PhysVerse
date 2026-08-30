@@ -44,9 +44,9 @@ export default function SocialAuthButtons({ mode }: Props) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 w-full">
       <div
-        className="flex justify-center [color-scheme:dark] [&>*]:!w-full [&_iframe]:!w-full"
+        className="w-full flex justify-center overflow-hidden rounded-lg [color-scheme:dark]"
         aria-busy={googleMutation.isPending}
       >
         <GoogleLogin
@@ -56,8 +56,7 @@ export default function SocialAuthButtons({ mode }: Props) {
           shape="rectangular"
           size="large"
           text={mode === 'signup' ? 'signup_with' : 'signin_with'}
-          logo_alignment="center"
-          width="280"
+          logo_alignment="left"
         />
       </div>
       {googleMutation.isPending && (

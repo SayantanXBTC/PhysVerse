@@ -184,8 +184,8 @@ export default function EnhancedProfilePage() {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
     toast.success('Logged out');
+    window.location.assign('/');
   };
 
   if (isLoading) {

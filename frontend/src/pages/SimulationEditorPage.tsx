@@ -254,9 +254,9 @@ export default function SimulationEditorPage() {
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 relative flex flex-col overflow-hidden bg-[#050507]">
-          <div className={`relative ${showChart ? 'flex-1' : 'h-full'} overflow-hidden transition-all duration-300`}>
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+        <div className="flex-1 relative flex flex-col overflow-hidden bg-[#050507] min-h-[50vh] lg:min-h-0">
+          <div className={`relative ${showChart ? 'flex-1' : 'h-full'} overflow-hidden transition-all duration-300 min-h-[280px]`}>
             <SimulationCanvas simulationId={simulationId} parameters={parameters} isRunning={isRunning} />
 
             <div className="pointer-events-none absolute inset-0">
@@ -323,7 +323,7 @@ export default function SimulationEditorPage() {
           </div>
         </div>
 
-        <aside className="w-96 shrink-0 bg-[#0a0a0c] border-l border-white/[0.06] overflow-y-auto">
+        <aside className="w-full lg:w-96 lg:shrink-0 bg-[#0a0a0c] border-t lg:border-t-0 lg:border-l border-white/[0.06] overflow-y-auto max-h-[60vh] lg:max-h-none">
           <div className="p-5 space-y-5">
             <div>
               <div className="flex items-center justify-between mb-2">
